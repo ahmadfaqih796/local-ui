@@ -1,11 +1,231 @@
 /**
  * Mesin Audio Real-time Web Audio API
  * Didesain khusus dengan:
- * 1. Pitch Shifter Granular Dual-Direction (Hann-Window Anti-Click & Anti-Clip)
- * 2. Dynamics Compressor Studio Limiter (Suara bulat & jernih tanpa distorsi kresek)
- * 3. Automatic Noise Gate (Menahan bocoran speaker)
- * 4. Isolasi Jalur 1-Arah ke VB-CABLE Input
+ * 1. Pitch Shifter Granular Sinkron (Jungle Algorithm - Chris Rogers & Chris Wilson / Google)
+ *    Equal-Power Crossfade & Synchronized Dual-Delay untuk suara jernih bebas klik & bebas kresek.
+ * 2. Dedicated Bypass untuk Mode Normal (Zero Delay & Bit-Perfect Studio Sound).
+ * 3. Balanced Ring Modulator untuk Efek Robot Futuristik yang jelas dan tidak berdengung.
+ * 4. Dynamics Compressor Studio Limiter (Mencegah distorsi pecah/clipping).
+ * 5. Automatic Noise Gate (Menahan bocoran suara ruangan dan desis mikrofon).
+ * 6. Isolasi Jalur 1-Arah Otomatis ke VB-CABLE Input (Meeting).
  */
+
+class JunglePitchShifter {
+  constructor(context) {
+    this.context = context
+    this.input = context.createGain()
+    this.output = context.createGain()
+
+    this.bufferTime = 0.100 // 100ms jendela buffer granular
+    this.fadeTime = 0.050   // 50ms crossfade batas
+    this.delayTime = 0.100  // 100ms basis
+
+    // Buat buffer modulasi delay dan envelope crossfade daya konstan (equal-power)
+    this.shiftDownBuffer = this._createDelayTimeBuffer(context, this.bufferTime, this.fadeTime, false)
+    this.shiftUpBuffer = this._createDelayTimeBuffer(context, this.bufferTime, this.fadeTime, true)
+    this.fadeBuffer = this._createFadeBuffer(context, this.bufferTime, this.fadeTime)
+
+    // Modulator LFO buffer sources (looping kontinu)
+    this.mod1 = context.createBufferSource()
+    this.mod2 = context.createBufferSource()
+    this.mod3 = context.createBufferSource()
+    this.mod4 = context.createBufferSource()
+
+    this.mod1.buffer = this.shiftDownBuffer
+    this.mod2.buffer = this.shiftDownBuffer
+    this.mod3.buffer = this.shiftUpBuffer
+    this.mod4.buffer = this.shiftUpBuffer
+
+    this.mod1.loop = true
+    this.mod2.loop = true
+    this.mod3.loop = true
+    this.mod4.loop = true
+
+    // Selector gain (mod1 & mod2 = Shift Down, mod3 & mod4 = Shift Up)
+    this.mod1Gain = context.createGain()
+    this.mod2Gain = context.createGain()
+    this.mod3Gain = context.createGain()
+    this.mod4Gain = context.createGain()
+
+    this.mod1Gain.gain.setValueAtTime(1, context.currentTime)
+    this.mod2Gain.gain.setValueAtTime(1, context.currentTime)
+    this.mod3Gain.gain.setValueAtTime(0, context.currentTime)
+    this.mod4Gain.gain.setValueAtTime(0, context.currentTime)
+
+    this.mod1.connect(this.mod1Gain)
+    this.mod2.connect(this.mod2Gain)
+    this.mod3.connect(this.mod3Gain)
+    this.mod4.connect(this.mod4Gain)
+
+    // Pengatur amplitudo kedalaman delay (Modulation Depth)
+    this.modGain1 = context.createGain()
+    this.modGain2 = context.createGain()
+    this.modGain1.gain.setValueAtTime(0, context.currentTime)
+    this.modGain2.gain.setValueAtTime(0, context.currentTime)
+
+    this.mod1Gain.connect(this.modGain1)
+    this.mod2Gain.connect(this.modGain2)
+    this.mod3Gain.connect(this.modGain1)
+    this.mod4Gain.connect(this.modGain2)
+
+    // Jalur delay audio
+    this.delay1 = context.createDelay(1.0)
+    this.delay2 = context.createDelay(1.0)
+    this.delay1.delayTime.setValueAtTime(0, context.currentTime)
+    this.delay2.delayTime.setValueAtTime(0, context.currentTime)
+
+    this.modGain1.connect(this.delay1.delayTime)
+    this.modGain2.connect(this.delay2.delayTime)
+
+    // Window crossfading
+    this.fade1 = context.createBufferSource()
+    this.fade2 = context.createBufferSource()
+    this.fade1.buffer = this.fadeBuffer
+    this.fade2.buffer = this.fadeBuffer
+    this.fade1.loop = true
+    this.fade2.loop = true
+
+    // Mixer Gain - SANGAT PENTING: gain awal harus 0.0 agar nilai murni diatur oleh fadeBuffer (0 s/d 1)
+    this.mix1 = context.createGain()
+    this.mix2 = context.createGain()
+    this.mix1.gain.setValueAtTime(0, context.currentTime)
+    this.mix2.gain.setValueAtTime(0, context.currentTime)
+
+    this.fade1.connect(this.mix1.gain)
+    this.fade2.connect(this.mix2.gain)
+
+    // Hubungkan jalur pemrosesan audio
+    this.input.connect(this.delay1)
+    this.input.connect(this.delay2)
+    this.delay1.connect(this.mix1)
+    this.delay2.connect(this.mix2)
+    this.mix1.connect(this.output)
+    this.mix2.connect(this.output)
+
+    // Mulai semua buffer secara sinkron dengan beda fase 180 derajat (50ms)
+    const t = context.currentTime + 0.050
+    const t2 = t + this.bufferTime - this.fadeTime
+    this.mod1.start(t)
+    this.mod2.start(t2)
+    this.mod3.start(t)
+    this.mod4.start(t2)
+    this.fade1.start(t)
+    this.fade2.start(t2)
+  }
+
+  /**
+   * Membuat buffer kurva jendela crossfade berdaya konstan (Equal-Power Square Root)
+   * Menjamin g1^2 + g2^2 = 1.0 konstan setiap saat, mematikan sinyal tepat di titik reset.
+   * @private
+   */
+  _createFadeBuffer(context, activeTime, fadeTime) {
+    const length1 = Math.floor(activeTime * context.sampleRate)
+    const length2 = Math.floor((activeTime - 2 * fadeTime) * context.sampleRate)
+    const length = length1 + Math.max(0, length2)
+    const buffer = context.createBuffer(1, length, context.sampleRate)
+    const p = buffer.getChannelData(0)
+
+    const fadeLength = Math.floor(fadeTime * context.sampleRate)
+    const fadeIndex1 = fadeLength
+    const fadeIndex2 = length1 - fadeLength
+
+    for (let i = 0; i < length1; ++i) {
+      let value
+      if (i < fadeIndex1) {
+        value = Math.sqrt(i / fadeLength)
+      } else if (i >= fadeIndex2) {
+        value = Math.sqrt(1 - (i - fadeIndex2) / fadeLength)
+      } else {
+        value = 1
+      }
+      p[i] = value
+    }
+
+    for (let i = length1; i < length; ++i) {
+      p[i] = 0
+    }
+
+    return buffer
+  }
+
+  /**
+   * Membuat kurva pergeseran waktu delay linier
+   * @private
+   */
+  _createDelayTimeBuffer(context, activeTime, fadeTime, shiftUp) {
+    const length1 = Math.floor(activeTime * context.sampleRate)
+    const length2 = Math.floor((activeTime - 2 * fadeTime) * context.sampleRate)
+    const length = length1 + Math.max(0, length2)
+    const buffer = context.createBuffer(1, length, context.sampleRate)
+    const p = buffer.getChannelData(0)
+
+    for (let i = 0; i < length1; ++i) {
+      if (shiftUp) {
+        // Nada naik: delay mengecil dari 1 ke 0
+        p[i] = (length1 - i) / length1
+      } else {
+        // Nada turun: delay membesar dari 0 ke 1
+        p[i] = i / length1
+      }
+    }
+
+    for (let i = length1; i < length; ++i) {
+      p[i] = 0
+    }
+
+    return buffer
+  }
+
+  /**
+   * Mengatur pergeseran nada dalam satuan semitone
+   * @param {number} semitones - Nilai semitone (-12 hingga +12)
+   */
+  setPitchSemitones(semitones) {
+    const ctx = this.context
+    if (!ctx) return
+
+    if (Math.abs(semitones) < 0.05) {
+      this.modGain1.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+      this.modGain2.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+      return
+    }
+
+    const ratio = Math.pow(2, semitones / 12)
+
+    if (semitones > 0) {
+      // Pitch UP
+      this.mod1Gain.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+      this.mod2Gain.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+      this.mod3Gain.gain.setTargetAtTime(1, ctx.currentTime, 0.015)
+      this.mod4Gain.gain.setTargetAtTime(1, ctx.currentTime, 0.015)
+    } else {
+      // Pitch DOWN
+      this.mod1Gain.gain.setTargetAtTime(1, ctx.currentTime, 0.015)
+      this.mod2Gain.gain.setTargetAtTime(1, ctx.currentTime, 0.015)
+      this.mod3Gain.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+      this.mod4Gain.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+    }
+
+    // Kedalaman modulasi Doppler: G = |1 - R| * bufferTime
+    const depth = Math.min(this.bufferTime * 0.9, Math.abs(1 - ratio) * this.bufferTime)
+    this.modGain1.gain.setTargetAtTime(depth, ctx.currentTime, 0.02)
+    this.modGain2.gain.setTargetAtTime(depth, ctx.currentTime, 0.02)
+  }
+
+  stop() {
+    try { this.mod1.stop() } catch { /* ignore */ }
+    try { this.mod2.stop() } catch { /* ignore */ }
+    try { this.mod3.stop() } catch { /* ignore */ }
+    try { this.mod4.stop() } catch { /* ignore */ }
+    try { this.fade1.stop() } catch { /* ignore */ }
+    try { this.fade2.stop() } catch { /* ignore */ }
+
+    try { this.input.disconnect() } catch { /* ignore */ }
+    try { this.output.disconnect() } catch { /* ignore */ }
+    try { this.delay1.disconnect() } catch { /* ignore */ }
+    try { this.delay2.disconnect() } catch { /* ignore */ }
+  }
+}
 
 class AudioEngine {
   constructor() {
@@ -16,11 +236,11 @@ class AudioEngine {
     // Node Noise Gate
     this.gateGain = null
     this.gateAnalyser = null
-    this.gateThreshold = 0.02
+    this.gateThreshold = 0.018
     this.isGateOpen = true
     this.gateCheckInterval = null
 
-    // Node Pemrosesan
+    // Node Input & Filter Studio EQ
     this.inputGain = null
     this.highPassFilter = null
     this.lowPassFilter = null
@@ -30,30 +250,26 @@ class AudioEngine {
     this.formantF2 = null
 
     // Node Pitch Shifter
-    this.pitchDelay1 = null
-    this.pitchDelay2 = null
-    this.pitchGain1 = null
-    this.pitchGain2 = null
-    this.pitchModSource1 = null
-    this.pitchModSource2 = null
-    this.pitchModGainSource1 = null
-    this.pitchModGainSource2 = null
-    this.pitchMixGain = null
+    this.pitchShifter = null
     this.dryGain = null
-    this.currentDirection = null
+    this.pitchMixGain = null
+    this.pitchSumGain = null
 
-    // Node Efek Robot
+    // Node Efek Robot (Balanced Modulator)
     this.robotOsc = null
-    this.robotModGain = null
+    this.robotOscGain = null
+    this.robotModNode = null
+    this.robotBandFilter = null
     this.robotDryGain = null
     this.robotWetGain = null
+    this.robotOutputGain = null
 
     // Node Efek Echo / Ruang
     this.echoDelay = null
     this.echoFeedback = null
     this.echoWetGain = null
 
-    // Node Efek Distorsi
+    // Node Efek Distorsi / Saturasi
     this.waveShaper = null
 
     // Dynamics Compressor (Studio Limiter anti-pecah)
@@ -73,7 +289,6 @@ class AudioEngine {
     this.isMuted = false
     this.isMonitoring = false
     this.currentParams = null
-    this.grainDuration = 0.08 // 80ms window optimal
     this.targetOutputDeviceId = ''
     this.isCableConnected = false
   }
@@ -138,12 +353,12 @@ class AudioEngine {
     this.inputGain = ctx.createGain()
     this.inputGain.gain.setValueAtTime(1.0, ctx.currentTime)
 
-    // 2. High-Pass Filter (Memotong dengung frekuensi rendah)
+    // 2. High-Pass Filter (Memotong dengung getaran meja & sub-bass)
     this.highPassFilter = ctx.createBiquadFilter()
     this.highPassFilter.type = 'highpass'
     this.highPassFilter.frequency.setValueAtTime(80, ctx.currentTime)
 
-    // 3. Low-Pass Filter
+    // 3. Low-Pass Filter (Memotong desis frekuensi ultra-tinggi)
     this.lowPassFilter = ctx.createBiquadFilter()
     this.lowPassFilter.type = 'lowpass'
     this.lowPassFilter.frequency.setValueAtTime(14000, ctx.currentTime)
@@ -160,31 +375,43 @@ class AudioEngine {
     this.trebleFilter.frequency.setValueAtTime(4000, ctx.currentTime)
     this.trebleFilter.gain.setValueAtTime(0, ctx.currentTime)
 
-    // 6. Formant Filter F1 (Peaking 1200Hz - Vokal Tengah)
+    // 6. Formant Filter F1 (Peaking 1200Hz - Vokal Tengah / Tenggorokan)
     this.formantF1 = ctx.createBiquadFilter()
     this.formantF1.type = 'peaking'
     this.formantF1.frequency.setValueAtTime(1200, ctx.currentTime)
-    this.formantF1.Q.setValueAtTime(1.6, ctx.currentTime)
+    this.formantF1.Q.setValueAtTime(1.4, ctx.currentTime)
     this.formantF1.gain.setValueAtTime(0, ctx.currentTime)
 
-    // 7. Formant Filter F2 (Peaking 2600Hz - Vokal Kejernihan)
+    // 7. Formant Filter F2 (Peaking 2600Hz - Kelembutan / Artikulasi Vokal)
     this.formantF2 = ctx.createBiquadFilter()
     this.formantF2.type = 'peaking'
     this.formantF2.frequency.setValueAtTime(2600, ctx.currentTime)
-    this.formantF2.Q.setValueAtTime(1.8, ctx.currentTime)
+    this.formantF2.Q.setValueAtTime(1.6, ctx.currentTime)
     this.formantF2.gain.setValueAtTime(0, ctx.currentTime)
 
-    // 8. Setup Pitch Shifter Nodes
-    this._setupPitchShifter(ctx)
+    // 8. Pitch Shifter (Jungle Synchronized Granular)
+    this.pitchShifter = new JunglePitchShifter(ctx)
 
-    // 9. Setup Robot Modulator
+    this.dryGain = ctx.createGain()
+    this.pitchMixGain = ctx.createGain()
+    this.pitchSumGain = ctx.createGain()
+
+    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime)
+    this.pitchMixGain.gain.setValueAtTime(0.0, ctx.currentTime)
+    this.pitchSumGain.gain.setValueAtTime(1.0, ctx.currentTime)
+
+    this.dryGain.connect(this.pitchSumGain)
+    this.pitchShifter.output.connect(this.pitchMixGain)
+    this.pitchMixGain.connect(this.pitchSumGain)
+
+    // 9. Robot Modulator (Balanced Modulator / Ring Modulator)
     this._setupRobotModulator(ctx)
 
-    // 10. Echo / Delay
-    this.echoDelay = ctx.createDelay()
-    this.echoDelay.delayTime.setValueAtTime(0.18, ctx.currentTime)
+    // 10. Echo / Ruangan (Reverb Delay)
+    this.echoDelay = ctx.createDelay(1.0)
+    this.echoDelay.delayTime.setValueAtTime(0.08, ctx.currentTime) // 80ms slapback
     this.echoFeedback = ctx.createGain()
-    this.echoFeedback.gain.setValueAtTime(0.25, ctx.currentTime)
+    this.echoFeedback.gain.setValueAtTime(0.12, ctx.currentTime)
     this.echoWetGain = ctx.createGain()
     this.echoWetGain.gain.setValueAtTime(0, ctx.currentTime)
 
@@ -192,18 +419,18 @@ class AudioEngine {
     this.echoFeedback.connect(this.echoDelay)
     this.echoDelay.connect(this.echoWetGain)
 
-    // 11. WaveShaper Distorsi
+    // 11. WaveShaper Distorsi / Saturasi Halus
     this.waveShaper = ctx.createWaveShaper()
-    this.waveShaper.curve = this._makeDistortionCurve(0)
+    this.waveShaper.curve = null
     this.waveShaper.oversample = '2x'
 
     // 12. DYNAMICS COMPRESSOR (Studio Limiter anti-kresek / anti-pecah)
     this.compressor = ctx.createDynamicsCompressor()
     this.compressor.threshold.setValueAtTime(-14, ctx.currentTime)
     this.compressor.knee.setValueAtTime(8, ctx.currentTime)
-    this.compressor.ratio.setValueAtTime(5, ctx.currentTime)
+    this.compressor.ratio.setValueAtTime(4.5, ctx.currentTime)
     this.compressor.attack.setValueAtTime(0.003, ctx.currentTime)
-    this.compressor.release.setValueAtTime(0.12, ctx.currentTime)
+    this.compressor.release.setValueAtTime(0.10, ctx.currentTime)
 
     // 13. Master Gain & Analyser
     this.masterGain = ctx.createGain()
@@ -220,7 +447,7 @@ class AudioEngine {
     // 15. Stream Destination (Kabel Virtual ke Meeting)
     this.streamDestination = ctx.createMediaStreamDestination()
 
-    // Hubungkan Rantai Suara
+    // Hubungkan Rantai Suara Lengkap
     this.sourceNode.connect(this.gateAnalyser)
     this.sourceNode.connect(this.gateGain)
     this.gateGain.connect(this.inputGain)
@@ -232,19 +459,15 @@ class AudioEngine {
     this.trebleFilter.connect(this.formantF1)
     this.formantF1.connect(this.formantF2)
 
-    // Formant -> Pitch Shifter Input
-    this.formantF2.connect(this.pitchDelay1)
-    this.formantF2.connect(this.pitchDelay2)
+    // Formant F2 terhubung ke jalur Dry dan Pitch Shifter
     this.formantF2.connect(this.dryGain)
+    this.formantF2.connect(this.pitchShifter.input)
 
-    // Pitch Mix -> Robot
-    this.pitchMixGain.connect(this.robotModGain)
-    this.pitchMixGain.connect(this.robotDryGain)
+    // Pitch Sum -> Robot Modulator
+    this.pitchSumGain.connect(this.robotDryGain)
+    this.pitchSumGain.connect(this.robotModNode)
 
-    this.robotOutputGain = ctx.createGain()
-    this.robotDryGain.connect(this.robotOutputGain)
-    this.robotWetGain.connect(this.robotOutputGain)
-
+    // Robot Output -> WaveShaper & Echo
     this.robotOutputGain.connect(this.waveShaper)
     this.waveShaper.connect(this.echoDelay)
     this.waveShaper.connect(this.compressor)
@@ -263,211 +486,64 @@ class AudioEngine {
   }
 
   /**
-   * Menyiapkan Node Pitch Shifter Granular
-   * @private
-   */
-  _setupPitchShifter(ctx) {
-    this.pitchDelay1 = ctx.createDelay(1.0)
-    this.pitchDelay2 = ctx.createDelay(1.0)
-
-    this.pitchGain1 = ctx.createGain()
-    this.pitchGain2 = ctx.createGain()
-    this.pitchMixGain = ctx.createGain()
-    this.dryGain = ctx.createGain()
-
-    this.pitchDelay1.connect(this.pitchGain1)
-    this.pitchDelay2.connect(this.pitchGain2)
-    this.pitchGain1.connect(this.pitchMixGain)
-    this.pitchGain2.connect(this.pitchMixGain)
-    this.dryGain.connect(this.pitchMixGain)
-
-    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime)
-    this.pitchMixGain.gain.setValueAtTime(1.0, ctx.currentTime)
-
-    // Set awal ke arah normal
-    this._configurePitchModulators('down')
-  }
-
-  /**
-   * Menghasilkan audio buffer ramp linier dengan Hann Window
-   * Delay terjamin SELALU positif (0.005s s/d 0.075s), bebas kresek & bebas clipping
-   * @private
-   */
-  _createModulationBuffers(ctx, grainDuration, direction) {
-    const bufferLen = Math.floor(ctx.sampleRate * grainDuration)
-    const modBuffer1 = ctx.createBuffer(1, bufferLen, ctx.sampleRate)
-    const modBuffer2 = ctx.createBuffer(1, bufferLen, ctx.sampleRate)
-    const gainBuffer1 = ctx.createBuffer(1, bufferLen, ctx.sampleRate)
-    const gainBuffer2 = ctx.createBuffer(1, bufferLen, ctx.sampleRate)
-
-    const d1 = modBuffer1.getChannelData(0)
-    const d2 = modBuffer2.getChannelData(0)
-    const g1 = gainBuffer1.getChannelData(0)
-    const g2 = gainBuffer2.getChannelData(0)
-
-    const minDelay = 0.005
-    const maxDelay = grainDuration - 0.005
-    const delayRange = maxDelay - minDelay
-
-    for (let i = 0; i < bufferLen; i++) {
-      const t = i / bufferLen
-
-      if (direction === 'up') {
-        // Pitch Up: delay waktu mengecil dari maxDelay ke minDelay
-        d1[i] = maxDelay - (t * delayRange)
-        d2[i] = maxDelay - (((t + 0.5) % 1.0) * delayRange)
-      } else {
-        // Pitch Down: delay waktu membesar dari minDelay ke maxDelay
-        d1[i] = minDelay + (t * delayRange)
-        d2[i] = minDelay + (((t + 0.5) % 1.0) * delayRange)
-      }
-
-      // Hann Window crossfade (pasti bernilai 0 di titik reset t=0 dan t=1)
-      g1[i] = 0.5 * (1 - Math.cos(2 * Math.PI * t))
-      g2[i] = 0.5 * (1 - Math.cos(2 * Math.PI * ((t + 0.5) % 1.0)))
-    }
-
-    return { modBuffer1, modBuffer2, gainBuffer1, gainBuffer2 }
-  }
-
-  /**
-   * Mengatur modulator buffer sesuai arah pitch (up atau down)
-   * @private
-   */
-  _configurePitchModulators(direction) {
-    const ctx = this.audioContext
-    if (!ctx) return
-
-    // Hentikan modulator sebelumnya
-    if (this.pitchModSource1) {
-      try { this.pitchModSource1.stop() } catch { /* ignore */ }
-    }
-    if (this.pitchModSource2) {
-      try { this.pitchModSource2.stop() } catch { /* ignore */ }
-    }
-    if (this.pitchModGainSource1) {
-      try { this.pitchModGainSource1.stop() } catch { /* ignore */ }
-    }
-    if (this.pitchModGainSource2) {
-      try { this.pitchModGainSource2.stop() } catch { /* ignore */ }
-    }
-
-    this.currentDirection = direction
-    const { modBuffer1, modBuffer2, gainBuffer1, gainBuffer2 } =
-      this._createModulationBuffers(ctx, this.grainDuration, direction)
-
-    this.pitchModSource1 = ctx.createBufferSource()
-    this.pitchModSource2 = ctx.createBufferSource()
-    this.pitchModGainSource1 = ctx.createBufferSource()
-    this.pitchModGainSource2 = ctx.createBufferSource()
-
-    this.pitchModSource1.buffer = modBuffer1
-    this.pitchModSource2.buffer = modBuffer2
-    this.pitchModGainSource1.buffer = gainBuffer1
-    this.pitchModGainSource2.buffer = gainBuffer2
-
-    this.pitchModSource1.loop = true
-    this.pitchModSource2.loop = true
-    this.pitchModGainSource1.loop = true
-    this.pitchModGainSource2.loop = true
-
-    // Hubungkan delayTime langsung ke buffer source (1.0 scale)
-    this.pitchModSource1.connect(this.pitchDelay1.delayTime)
-    this.pitchModSource2.connect(this.pitchDelay2.delayTime)
-
-    // Hubungkan crossfade gain
-    this.pitchModGainSource1.connect(this.pitchGain1.gain)
-    this.pitchModGainSource2.connect(this.pitchGain2.gain)
-
-    this.pitchModSource1.start(0)
-    this.pitchModSource2.start(0)
-    this.pitchModGainSource1.start(0)
-    this.pitchModGainSource2.start(0)
-  }
-
-  /**
-   * Mengatur kecepatan pergeseran nada (Pitch Shift)
-   * @private
-   */
-  _updatePitchRatio(ratio) {
-    if (!this.audioContext) return
-
-    const isNormal = Math.abs(ratio - 1.0) < 0.04
-    const ctx = this.audioContext
-
-    if (isNormal) {
-      this.dryGain.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02)
-      this.pitchMixGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.02)
-      return
-    }
-
-    this.dryGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.02)
-    this.pitchMixGain.gain.setTargetAtTime(1.0, ctx.currentTime, 0.02)
-
-    // Tentukan arah modulasi (up atau down)
-    const neededDirection = ratio > 1.0 ? 'up' : 'down'
-    if (this.currentDirection !== neededDirection) {
-      this._configurePitchModulators(neededDirection)
-    }
-
-    // Hitung playback rate modulator
-    // f_shift rate: deltaDelay / time = |1 - ratio|
-    const delta = Math.abs(1.0 - ratio)
-    const rate = Math.max(0.1, delta * 1.6)
-
-    if (this.pitchModSource1 && this.pitchModSource2) {
-      this.pitchModSource1.playbackRate.setTargetAtTime(rate, ctx.currentTime, 0.02)
-      this.pitchModSource2.playbackRate.setTargetAtTime(rate, ctx.currentTime, 0.02)
-      this.pitchModGainSource1.playbackRate.setTargetAtTime(rate, ctx.currentTime, 0.02)
-      this.pitchModGainSource2.playbackRate.setTargetAtTime(rate, ctx.currentTime, 0.02)
-    }
-  }
-
-  /**
-   * Menyiapkan modulasi robot
+   * Menyiapkan Balanced Ring Modulator untuk Efek Robot Futuristik
    * @private
    */
   _setupRobotModulator(ctx) {
     this.robotOsc = ctx.createOscillator()
     this.robotOsc.type = 'sine'
-    this.robotOsc.frequency.setValueAtTime(56, ctx.currentTime)
+    this.robotOsc.frequency.setValueAtTime(48, ctx.currentTime)
 
-    this.robotModGain = ctx.createGain()
+    this.robotOscGain = ctx.createGain()
+    this.robotOscGain.gain.setValueAtTime(1.0, ctx.currentTime)
+    this.robotOsc.connect(this.robotOscGain)
+
+    this.robotModNode = ctx.createGain()
+    this.robotModNode.gain.setValueAtTime(0.0, ctx.currentTime)
+    this.robotOscGain.connect(this.robotModNode.gain)
+
+    // Filter potong sub-bass modulasi agar tidak berdengung
+    this.robotBandFilter = ctx.createBiquadFilter()
+    this.robotBandFilter.type = 'highpass'
+    this.robotBandFilter.frequency.setValueAtTime(160, ctx.currentTime)
+
     this.robotDryGain = ctx.createGain()
     this.robotWetGain = ctx.createGain()
-
-    this.robotOsc.connect(this.robotModGain.gain)
-    this.robotModGain.connect(this.robotWetGain)
+    this.robotOutputGain = ctx.createGain()
 
     this.robotDryGain.gain.setValueAtTime(1.0, ctx.currentTime)
-    this.robotWetGain.gain.setValueAtTime(0, ctx.currentTime)
+    this.robotWetGain.gain.setValueAtTime(0.0, ctx.currentTime)
+    this.robotOutputGain.gain.setValueAtTime(1.0, ctx.currentTime)
+
+    this.robotModNode.connect(this.robotBandFilter)
+    this.robotBandFilter.connect(this.robotWetGain)
+
+    this.robotDryGain.connect(this.robotOutputGain)
+    this.robotWetGain.connect(this.robotOutputGain)
 
     this.robotOsc.start(0)
   }
 
   /**
-   * Membuat kurva transfer distorsi halus (anti-clipping)
+   * Membuat kurva transfer distorsi saturasi halus (anti-clipping)
    * @private
    */
   _makeDistortionCurve(amount) {
-    const k = typeof amount === 'number' ? amount * 30 : 0
-    const nSamples = 44100
-    const curve = new Float32Array(nSamples)
-    const deg = Math.PI / 180
-
-    for (let i = 0; i < nSamples; i++) {
-      const x = (i * 2) / nSamples - 1
-      if (k === 0) {
-        curve[i] = x
-      } else {
-        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x))
-      }
+    if (!amount || amount <= 0.001) {
+      return null
+    }
+    const n = 2048
+    const curve = new Float32Array(n)
+    const drive = 1 + amount * 3.5
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1
+      curve[i] = Math.tanh(x * drive) / Math.tanh(drive)
     }
     return curve
   }
 
   /**
-   * Loop Noise Gate
+   * Loop Noise Gate otomatis
    * @private
    */
   _startNoiseGateLoop() {
@@ -489,7 +565,7 @@ class AudioEngine {
       const ctx = this.audioContext
       if (rms < this.gateThreshold) {
         if (this.isGateOpen) {
-          this.gateGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05)
+          this.gateGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.04)
           this.isGateOpen = false
         }
       } else {
@@ -513,13 +589,29 @@ class AudioEngine {
 
     const ctx = this.audioContext
     const t = ctx.currentTime
-    const rampTime = 0.03
+    const rampTime = 0.02
 
     this.currentParams = params
 
-    const ratio = params.pitchRatio ?? Math.pow(2, (params.pitchSemitones ?? 0) / 12)
-    this._updatePitchRatio(ratio)
+    // 1. Pitch Shifter Routing
+    const semitones = params.pitchSemitones ?? 0
+    if (Math.abs(semitones) < 0.1) {
+      // Bypass 100% jika semitone 0 (Normal Studio Clean)
+      this.dryGain.gain.setTargetAtTime(1.0, t, rampTime)
+      this.pitchMixGain.gain.setTargetAtTime(0.0, t, rampTime)
+      if (this.pitchShifter) {
+        this.pitchShifter.setPitchSemitones(0)
+      }
+    } else {
+      // Alihkan ke Pitch Shifter
+      this.dryGain.gain.setTargetAtTime(0.0, t, rampTime)
+      this.pitchMixGain.gain.setTargetAtTime(1.0, t, rampTime)
+      if (this.pitchShifter) {
+        this.pitchShifter.setPitchSemitones(semitones)
+      }
+    }
 
+    // 2. Filter Frekuensi
     if (params.highPassFreq !== undefined) {
       this.highPassFilter.frequency.setTargetAtTime(params.highPassFreq, t, rampTime)
     }
@@ -541,18 +633,22 @@ class AudioEngine {
       this.formantF2.gain.setTargetAtTime(params.formantF2, t, rampTime)
     }
 
-    if (params.robotMix !== undefined) {
-      this.robotWetGain.gain.setTargetAtTime(params.robotMix, t, rampTime)
-      this.robotDryGain.gain.setTargetAtTime(1.0 - params.robotMix * 0.6, t, rampTime)
+    // 3. Efek Robot
+    if (params.robotMix !== undefined && this.robotWetGain && this.robotDryGain) {
+      const rMix = params.robotMix
+      this.robotWetGain.gain.setTargetAtTime(rMix * 0.9, t, rampTime)
+      this.robotDryGain.gain.setTargetAtTime(1.0 - rMix * 0.5, t, rampTime)
     }
-    if (params.robotFreq !== undefined) {
+    if (params.robotFreq !== undefined && this.robotOsc) {
       this.robotOsc.frequency.setTargetAtTime(params.robotFreq, t, rampTime)
     }
 
-    if (params.echoMix !== undefined) {
+    // 4. Efek Echo / Pantulan
+    if (params.echoMix !== undefined && this.echoWetGain) {
       this.echoWetGain.gain.setTargetAtTime(params.echoMix, t, rampTime)
     }
 
+    // 5. Efek Distorsi Saturasi
     if (params.distortion !== undefined && this.waveShaper) {
       this.waveShaper.curve = this._makeDistortionCurve(params.distortion)
     }
@@ -702,6 +798,11 @@ class AudioEngine {
     if (this.gateCheckInterval) {
       clearInterval(this.gateCheckInterval)
       this.gateCheckInterval = null
+    }
+
+    if (this.pitchShifter) {
+      this.pitchShifter.stop()
+      this.pitchShifter = null
     }
 
     if (this.mediaStream) {
