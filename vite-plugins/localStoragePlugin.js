@@ -6,6 +6,7 @@ import os from 'node:os'
 /**
  * Plugin Vite untuk Layanan Penyimpanan Berkas Lokal (Wi-Fi Shared Storage Hub)
  * Mengubah laptop menjadi server penyimpanan lokal tanpa memerlukan kuota internet.
+ * Dilengkapi Server-Sent Events (SSE) murni event-driven real-time (tanpa polling HTTP berulang).
  */
 export function localStoragePlugin() {
   const storageDir = path.resolve(process.cwd(), 'storage_drive')
@@ -13,11 +14,58 @@ export function localStoragePlugin() {
     fs.mkdirSync(storageDir, { recursive: true })
   }
 
+  // Set koneksi aktif Server-Sent Events (SSE)
+  const sseClients = new Set()
+
+  function broadcastChange() {
+    const payload = `data: ${JSON.stringify({ type: 'files_changed', timestamp: Date.now() })}\n\n`
+    for (const client of sseClients) {
+      try {
+        client.write(payload)
+      } catch {
+        sseClients.delete(client)
+      }
+    }
+  }
+
+  // Watcher direktori fisik storage_drive (debounced 200ms)
+  let watchTimer = null
+  try {
+    fs.watch(storageDir, (eventType, filename) => {
+      if (filename && filename.startsWith('.')) return
+      if (watchTimer) clearTimeout(watchTimer)
+      watchTimer = setTimeout(() => {
+        broadcastChange()
+      }, 200)
+    })
+  } catch (err) {
+    console.warn('Gagal memasang fs.watch:', err)
+  }
+
   return {
     name: 'vite-local-storage-plugin',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const urlObj = new URL(req.url, 'http://localhost')
+
+        // 0. Jalur Real-time Event Stream (Server-Sent Events)
+        if (req.method === 'GET' && urlObj.pathname === '/api/storage/events') {
+          res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache, no-transform',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*',
+          })
+          res.write('retry: 3000\n\n')
+          res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`)
+
+          sseClients.add(res)
+
+          req.on('close', () => {
+            sseClients.delete(res)
+          })
+          return
+        }
 
         // 1. Informasi IP Jaringan Lokal (Wi-Fi)
         if (req.method === 'GET' && urlObj.pathname === '/api/storage/network-info') {
@@ -86,6 +134,7 @@ export function localStoragePlugin() {
           req.pipe(writeStream)
 
           writeStream.on('finish', () => {
+            broadcastChange()
             const stat = fs.statSync(targetPath)
             res.writeHead(200, { 'Content-Type': 'application/json' })
             res.end(
@@ -139,6 +188,7 @@ export function localStoragePlugin() {
           if (fs.existsSync(filePath)) {
             try {
               fs.unlinkSync(filePath)
+              broadcastChange()
             } catch { /* ignore */ }
           }
 

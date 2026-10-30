@@ -7,7 +7,11 @@ import {
 import { StorageBanner } from '@/features/file-transfer/components/StorageBanner'
 import { UploadDropzone } from '@/features/file-transfer/components/UploadDropzone'
 import { StoredFilesCard } from '@/features/file-transfer/components/StoredFilesCard'
-import { getNetworkInfo, getStoredFiles } from '@/features/file-transfer/services/localStorageApi'
+import {
+  getNetworkInfo,
+  getStoredFiles,
+  subscribeToFileChanges,
+} from '@/features/file-transfer/services/localStorageApi'
 
 /**
  * Halaman Utama: Pusat Penyimpanan Berkas Wi-Fi Lokal (Fresh Green Theme)
@@ -42,15 +46,16 @@ export function FileTransferPage() {
       setFiles(fileList)
     })
 
-    // Polling setiap 4 detik agar saat ada file yang diunggah dari HP, layar laptop langsung update otomatis
-    const interval = setInterval(async () => {
-      const fileList = await getStoredFiles()
-      if (isMounted) setFiles(fileList)
-    }, 4000)
+    // Sambungkan ke Server-Sent Events (SSE) murni event-driven (NO POLLING!)
+    const unsubscribe = subscribeToFileChanges(() => {
+      getStoredFiles().then((fileList) => {
+        if (isMounted) setFiles(fileList)
+      })
+    })
 
     return () => {
       isMounted = false
-      clearInterval(interval)
+      unsubscribe()
     }
   }, [])
 

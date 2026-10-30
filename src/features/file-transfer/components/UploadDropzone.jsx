@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { UploadCloud, FileUp } from 'lucide-react'
 import { toast } from 'sonner'
-import { uploadFileToLaptop } from '../services/localStorageApi'
+import { uploadFileToLaptop, notifyLocalFileChange } from '../services/localStorageApi'
 import { formatBytes } from '../utils/formatBytes'
 
 /**
@@ -74,6 +74,7 @@ export function UploadDropzone({ onUploadSuccess = () => {} }) {
         )
 
         toast.success(`Berhasil disimpan ke laptop: ${file.name}`)
+        notifyLocalFileChange()
         onUploadSuccess()
 
         setTimeout(() => {
