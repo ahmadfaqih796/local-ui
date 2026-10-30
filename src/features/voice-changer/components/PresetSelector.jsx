@@ -48,7 +48,7 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
               {/* Header Kartu: Ikon & Badge */}
               <div className="flex w-full items-center justify-between mb-2.5">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${preset.color} text-white shadow-md transition-transform group-hover:scale-105`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br ${preset.color} text-white shadow-md transition-transform group-hover:scale-105`}
                 >
                   <IconComponent className="h-5 w-5" />
                 </div>
@@ -75,7 +75,7 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
 
               {/* Garis Aksen Bawah jika aktif */}
               {isSelected && (
-                <div className="absolute inset-x-0 bottom-0 h-1.5 rounded-b-2xl bg-gradient-to-r from-emerald-500 to-teal-500" />
+                <div className="absolute inset-x-0 bottom-0 h-1.5 rounded-b-2xl bg-linear-to-r from-emerald-500 to-teal-500" />
               )}
             </button>
           )

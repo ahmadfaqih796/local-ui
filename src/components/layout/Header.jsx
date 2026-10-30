@@ -18,7 +18,7 @@ export function Header() {
           <div className="flex h-16 items-center justify-between gap-3">
             {/* Logo & Identitas Aplikasi */}
             <NavLink to="/file-transfer" className="flex items-center gap-2.5 shrink-0">
-              <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-linear-to-tr from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20">
                 <Radio className="h-5 w-5 animate-pulse" />
               </div>
               <div>
@@ -41,10 +41,9 @@ export function Header() {
               <NavLink
                 to="/voice-changer"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                      : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
+                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${isActive
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                    : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
                   }`
                 }
               >
@@ -55,10 +54,9 @@ export function Header() {
               <NavLink
                 to="/file-transfer"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                      : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
+                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${isActive
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                    : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
                   }`
                 }
               >

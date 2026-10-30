@@ -157,8 +157,8 @@ export function TransferQueueCard({
                       isComplete
                         ? 'bg-emerald-500'
                         : isSending
-                        ? 'bg-gradient-to-r from-indigo-500 to-indigo-400'
-                        : 'bg-gradient-to-r from-cyan-500 to-emerald-400'
+                        ? 'bg-linear-to-r from-indigo-500 to-indigo-400'
+                        : 'bg-linear-to-r from-cyan-500 to-emerald-400'
                     }`}
                     style={{ width: `${item.progress || 0}%` }}
                   />

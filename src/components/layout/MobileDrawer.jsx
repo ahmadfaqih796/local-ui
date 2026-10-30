@@ -36,7 +36,7 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
         <div>
           <div className="flex items-center justify-between border-b border-emerald-100 pb-4 mb-5">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-tr from-emerald-600 to-teal-500 text-white shadow-sm">
                 <Radio className="h-4 w-4 animate-pulse" />
               </div>
               <div>
@@ -151,3 +151,4 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
     </div>
   )
 }
+
