@@ -105,3 +105,4 @@ export function HotspotGuidePanel({ isHotspotActive = false }) {
     </div>
   )
 }
+
