@@ -96,9 +96,6 @@ export async function deleteStoredFile(fileName) {
     const res = await fetch(`/api/storage/files/${encodedName}`, {
       method: 'DELETE',
     })
-    if (res.ok) {
-      notifyLocalFileChange()
-    }
     return res.ok
   } catch (err) {
     console.error('Gagal menghapus file:', err)
@@ -107,13 +104,21 @@ export async function deleteStoredFile(fileName) {
 }
 
 /**
- * Berlangganan event real-time (Server-Sent Events & BroadcastChannel) saat ada file baru / dihapus
- * Menggantikan mekanisme polling HTTP berulang (0 unnecessary requests)
+ * Berlangganan event real-time (Server-Sent Events) saat ada file baru / dihapus
+ * Menggunakan debouncing agar hanya memicu TEPAT 1 kali refresh saat perubahan terjadi
  * @param {Function} onFileChange - Callback yang dipanggil saat ada perubahan berkas
  * @returns {Function} Fungsi pembersih / unsubscribe
  */
 export function subscribeToFileChanges(onFileChange = () => {}) {
   let eventSource = null
+  let debounceTimer = null
+
+  const triggerDebounced = () => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      onFileChange()
+    }, 250)
+  }
 
   try {
     eventSource = new EventSource('/api/storage/events')
@@ -122,49 +127,21 @@ export function subscribeToFileChanges(onFileChange = () => {}) {
       try {
         const data = JSON.parse(event.data)
         if (data.type === 'files_changed') {
-          onFileChange()
+          triggerDebounced()
         }
       } catch {
-        onFileChange()
+        triggerDebounced()
       }
     }
   } catch (err) {
     console.warn('SSE tidak dapat diinisialisasi:', err)
   }
 
-  // Listener tab browser lokal
-  let channel = null
-  try {
-    channel = new BroadcastChannel('localhub_storage_stream')
-    channel.onmessage = (msg) => {
-      if (msg.data?.type === 'files_changed') {
-        onFileChange()
-      }
-    }
-  } catch {
-    // Ignore BroadcastChannel errors
-  }
-
   return () => {
+    if (debounceTimer) clearTimeout(debounceTimer)
     if (eventSource) {
       eventSource.close()
     }
-    if (channel) {
-      channel.close()
-    }
-  }
-}
-
-/**
- * Mengirim notifikasi lokal ke tab browser lain saat ada berkas diunggah
- */
-export function notifyLocalFileChange() {
-  try {
-    const channel = new BroadcastChannel('localhub_storage_stream')
-    channel.postMessage({ type: 'files_changed' })
-    channel.close()
-  } catch {
-    // Ignore
   }
 }
 

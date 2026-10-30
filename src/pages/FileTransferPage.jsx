@@ -39,6 +39,16 @@ export function FileTransferPage() {
   // Muat data saat halaman dibuka secara aman
   useEffect(() => {
     let isMounted = true
+    let debounceTimer = null
+
+    const safeRefresh = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        getStoredFiles().then((fileList) => {
+          if (isMounted) setFiles(fileList)
+        })
+      }, 200)
+    }
 
     Promise.all([getNetworkInfo(), getStoredFiles()]).then(([net, fileList]) => {
       if (!isMounted) return
@@ -48,13 +58,12 @@ export function FileTransferPage() {
 
     // Sambungkan ke Server-Sent Events (SSE) murni event-driven (NO POLLING!)
     const unsubscribe = subscribeToFileChanges(() => {
-      getStoredFiles().then((fileList) => {
-        if (isMounted) setFiles(fileList)
-      })
+      safeRefresh()
     })
 
     return () => {
       isMounted = false
+      if (debounceTimer) clearTimeout(debounceTimer)
       unsubscribe()
     }
   }, [])

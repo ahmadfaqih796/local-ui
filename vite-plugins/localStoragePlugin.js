@@ -6,7 +6,7 @@ import os from 'node:os'
 /**
  * Plugin Vite untuk Layanan Penyimpanan Berkas Lokal (Wi-Fi Shared Storage Hub)
  * Mengubah laptop menjadi server penyimpanan lokal tanpa memerlukan kuota internet.
- * Dilengkapi Server-Sent Events (SSE) murni event-driven real-time (tanpa polling HTTP berulang).
+ * Dilengkapi Server-Sent Events (SSE) murni event-driven real-time dengan debouncing anti-spam.
  */
 export function localStoragePlugin() {
   const storageDir = path.resolve(process.cwd(), 'storage_drive')
@@ -16,27 +16,28 @@ export function localStoragePlugin() {
 
   // Set koneksi aktif Server-Sent Events (SSE)
   const sseClients = new Set()
+  let broadcastTimer = null
 
-  function broadcastChange() {
-    const payload = `data: ${JSON.stringify({ type: 'files_changed', timestamp: Date.now() })}\n\n`
-    for (const client of sseClients) {
-      try {
-        client.write(payload)
-      } catch {
-        sseClients.delete(client)
+  // Debounced broadcast: menjamin HANYA 1 event SSE yang dikirim walau ada puluhan event I/O disk pada Windows
+  function scheduleBroadcast(delay = 250) {
+    if (broadcastTimer) clearTimeout(broadcastTimer)
+    broadcastTimer = setTimeout(() => {
+      const payload = `data: ${JSON.stringify({ type: 'files_changed', timestamp: Date.now() })}\n\n`
+      for (const client of sseClients) {
+        try {
+          client.write(payload)
+        } catch {
+          sseClients.delete(client)
+        }
       }
-    }
+    }, delay)
   }
 
-  // Watcher direktori fisik storage_drive (debounced 200ms)
-  let watchTimer = null
+  // Watcher direktori fisik storage_drive (untuk berkas yang di-paste manual via Windows Explorer)
   try {
     fs.watch(storageDir, (eventType, filename) => {
       if (filename && filename.startsWith('.')) return
-      if (watchTimer) clearTimeout(watchTimer)
-      watchTimer = setTimeout(() => {
-        broadcastChange()
-      }, 200)
+      scheduleBroadcast(400)
     })
   } catch (err) {
     console.warn('Gagal memasang fs.watch:', err)
@@ -56,7 +57,7 @@ export function localStoragePlugin() {
             'Connection': 'keep-alive',
             'Access-Control-Allow-Origin': '*',
           })
-          res.write('retry: 3000\n\n')
+          res.write('retry: 5000\n\n')
           res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`)
 
           sseClients.add(res)
@@ -134,7 +135,7 @@ export function localStoragePlugin() {
           req.pipe(writeStream)
 
           writeStream.on('finish', () => {
-            broadcastChange()
+            scheduleBroadcast(150)
             const stat = fs.statSync(targetPath)
             res.writeHead(200, { 'Content-Type': 'application/json' })
             res.end(
@@ -188,7 +189,7 @@ export function localStoragePlugin() {
           if (fs.existsSync(filePath)) {
             try {
               fs.unlinkSync(filePath)
-              broadcastChange()
+              scheduleBroadcast(150)
             } catch { /* ignore */ }
           }
 
