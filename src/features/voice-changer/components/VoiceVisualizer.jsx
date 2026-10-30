@@ -153,9 +153,9 @@ export function VoiceVisualizer({ isActive, isMuted }) {
   }, [isActive, isMuted, viewMode])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl backdrop-blur-md">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-200/90 bg-white p-4 shadow-xs">
       {/* Header Visualizer */}
-      <div className="mb-3 flex items-center justify-between border-b border-slate-800/80 pb-3">
+      <div className="mb-3 flex items-center justify-between border-b border-emerald-100 pb-3">
         <div className="flex items-center gap-2.5">
           <div
             className={`flex h-3 w-3 items-center justify-center rounded-full ${
@@ -166,7 +166,7 @@ export function VoiceVisualizer({ isActive, isMuted }) {
               <span className="h-1.5 w-1.5 animate-ping rounded-full bg-emerald-300" />
             )}
           </div>
-          <span className="text-xs font-semibold tracking-wider uppercase text-slate-300">
+          <span className="text-xs font-semibold tracking-wider uppercase text-slate-700">
             {isActive && !isMuted
               ? 'Live Effect Engine Aktif'
               : isMuted
@@ -176,14 +176,14 @@ export function VoiceVisualizer({ isActive, isMuted }) {
         </div>
 
         {/* Tombol Ganti Mode Tampilan */}
-        <div className="flex items-center rounded-lg bg-slate-950/70 p-1 border border-slate-800">
+        <div className="flex items-center rounded-lg bg-slate-100 p-1 border border-slate-200">
           <button
             type="button"
             onClick={() => setViewMode('waveform')}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
               viewMode === 'waveform'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Tampilkan Gelombang Suara (Oscilloscope)"
           >
@@ -193,10 +193,10 @@ export function VoiceVisualizer({ isActive, isMuted }) {
           <button
             type="button"
             onClick={() => setViewMode('spectrum')}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
               viewMode === 'spectrum'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Tampilkan Spektrum Frekuensi Suara"
           >
@@ -207,16 +207,16 @@ export function VoiceVisualizer({ isActive, isMuted }) {
       </div>
 
       {/* Area Layar Canvas */}
-      <div className="relative h-44 w-full rounded-xl overflow-hidden border border-slate-800/80 bg-slate-950">
+      <div className="relative h-44 w-full rounded-xl overflow-hidden border border-slate-900/10 bg-slate-950 shadow-inner">
         <canvas ref={canvasRef} className="h-full w-full block" />
 
         {/* Overlay saat non-aktif */}
         {!isActive && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/75 backdrop-blur-xs text-center p-4">
-            <Radio className="h-8 w-8 text-slate-600 mb-2 animate-pulse" />
-            <p className="text-sm font-medium text-slate-300">Mikrofon Belum Dinyalakan</p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Klik tombol &quot;Mulai Mikrofon&quot; di bawah untuk mendengar suara vokal
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xs text-center p-4">
+            <Radio className="h-8 w-8 text-slate-500 mb-2 animate-pulse" />
+            <p className="text-sm font-semibold text-slate-200">Mikrofon Belum Dinyalakan</p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Klik tombol &quot;Mulai Pengubah Suara&quot; di atas untuk mendengar suara vokal
             </p>
           </div>
         )}
@@ -224,23 +224,23 @@ export function VoiceVisualizer({ isActive, isMuted }) {
 
       {/* Meter Level Input (VU Meter) */}
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <Volume2 className="h-3.5 w-3.5" />
-          <span className="font-mono">VU</span>
+        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <Volume2 className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="font-mono font-medium">VU</span>
         </div>
-        <div className="relative flex-1 h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+        <div className="relative flex-1 h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
           <div
             className={`h-full transition-all duration-75 rounded-full ${
               vuLevel > 85
                 ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'
                 : vuLevel > 65
                 ? 'bg-amber-400'
-                : 'bg-emerald-400 shadow-[0_0_8px_#10b981]'
+                : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'
             }`}
             style={{ width: `${vuLevel}%` }}
           />
         </div>
-        <span className="font-mono text-[11px] text-slate-400 w-8 text-right">
+        <span className="font-mono text-[11px] text-slate-500 w-8 text-right font-medium">
           {vuLevel}%
         </span>
       </div>

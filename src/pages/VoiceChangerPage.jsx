@@ -97,7 +97,7 @@ export function VoiceChangerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20 sm:pb-12">
+    <div className="min-h-screen text-slate-800 pb-20 sm:pb-12">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {/* KARTU UTAMA 1-KLIK (ZERO CONFIGURATION) */}
         <SimpleMeetingCard
@@ -120,14 +120,14 @@ export function VoiceChangerPage() {
             <VoiceVisualizer isActive={isActive} isMuted={isMuted} />
 
             {/* Kotak Petunjuk Anti-Mantul Singkat */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-400 space-y-2">
-              <p className="font-semibold text-slate-200 flex items-center gap-2">
+            <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-xs text-slate-600 shadow-xs space-y-2">
+              <p className="font-semibold text-slate-800 flex items-center gap-2">
                 <span>🛡️ Status Jalur Audio Google Meet:</span>
               </p>
-              <ul className="space-y-1 text-slate-300 text-[11px] list-disc list-inside">
-                <li>Google Meet Mikrofon: <strong>CABLE Output (VB-Audio)</strong>.</li>
-                <li>Google Meet Speaker: <strong>Speaker (Realtek Audio)</strong>.</li>
-                <li>Audio presentasi di Google Meet: <strong>NONAKTIF / MATI</strong>.</li>
+              <ul className="space-y-1 text-slate-600 text-[11px] list-disc list-inside">
+                <li>Google Meet Mikrofon: <strong className="text-emerald-800">CABLE Output (VB-Audio)</strong>.</li>
+                <li>Google Meet Speaker: <strong className="text-slate-800">Speaker (Realtek Audio)</strong>.</li>
+                <li>Audio presentasi di Google Meet: <strong className="text-rose-700">NONAKTIF / MATI</strong>.</li>
               </ul>
             </div>
           </div>
@@ -142,17 +142,17 @@ export function VoiceChangerPage() {
         </div>
 
         {/* ACCORDION PENGATURAN LANJUTAN (OPSIONAL) */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 overflow-hidden">
+        <div className="rounded-2xl border border-emerald-200/90 bg-white overflow-hidden shadow-xs">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between p-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
+            className="w-full flex items-center justify-between p-4 text-xs font-semibold text-slate-700 hover:text-emerald-800 hover:bg-emerald-50/50 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <Settings2 className="h-4 w-4 text-indigo-400" />
+              <Settings2 className="h-4 w-4 text-emerald-600" />
               <span>Pengaturan Lanjutan &amp; Fine-Tuning Slider (Opsional)</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-400">
+            <div className="flex items-center gap-1.5 text-slate-500">
               <span>{showAdvanced ? 'Sembunyikan' : 'Buka Pengaturan'}</span>
               {showAdvanced ? (
                 <ChevronUp className="h-4 w-4" />
@@ -163,7 +163,7 @@ export function VoiceChangerPage() {
           </button>
 
           {showAdvanced && (
-            <div className="p-4 border-t border-slate-800 space-y-6 animate-in fade-in duration-200">
+            <div className="p-4 border-t border-emerald-100 space-y-6 animate-in fade-in duration-200 bg-emerald-50/20">
               {/* Slider Fine-Tuning Kustom */}
               <CustomControls
                 params={customParams}

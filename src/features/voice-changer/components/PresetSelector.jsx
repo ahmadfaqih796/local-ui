@@ -12,23 +12,23 @@ const ICON_MAP = {
 }
 
 /**
- * Komponen Pemilihan Preset Suara Cepat
+ * Komponen Pemilihan Preset Suara Cepat (Fresh Green Light Mode)
  */
 export function PresetSelector({ selectedPresetId, onSelectPreset }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-slate-300">
+        <h3 className="text-xs font-bold tracking-wider uppercase text-emerald-900">
           Preset Karakter Suara
         </h3>
         {selectedPresetId === 'custom' && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-400 border border-amber-500/30">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-300">
             Mode Kustom Aktif
           </span>
         )}
       </div>
 
-      {/* Grid Kartu Preset Responsif */}
+      {/* Grid Kartu Preset Responsif Mode Terang */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {VOICE_PRESETS.map((preset) => {
           const isSelected = selectedPresetId === preset.id
@@ -39,26 +39,26 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
               key={preset.id}
               type="button"
               onClick={() => onSelectPreset(preset.id)}
-              className={`group relative flex flex-col items-start p-4 rounded-xl text-left transition-all duration-200 border cursor-pointer ${
+              className={`group relative flex flex-col items-start p-4 rounded-2xl text-left transition-all duration-200 border cursor-pointer ${
                 isSelected
-                  ? 'border-indigo-500/80 bg-slate-800/90 shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-1 ring-indigo-500'
-                  : 'border-slate-800/80 bg-slate-900/60 hover:bg-slate-800/60 hover:border-slate-700'
+                  ? 'border-emerald-500 bg-emerald-50/90 shadow-md ring-2 ring-emerald-500/50'
+                  : 'border-emerald-200/90 bg-white hover:bg-emerald-50/50 hover:border-emerald-300 shadow-xs'
               }`}
             >
               {/* Header Kartu: Ikon & Badge */}
               <div className="flex w-full items-center justify-between mb-2.5">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${preset.color} text-white shadow-md transition-transform group-hover:scale-105`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${preset.color} text-white shadow-md transition-transform group-hover:scale-105`}
                 >
                   <IconComponent className="h-5 w-5" />
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="rounded-md bg-slate-800 px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase text-slate-400 border border-slate-700/60">
+                  <span className="rounded-md bg-emerald-100/70 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase text-emerald-800 border border-emerald-200">
                     {preset.badge}
                   </span>
                   {isSelected && (
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-white shadow-xs">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xs">
                       <Check className="h-3 w-3 stroke-[3]" />
                     </div>
                   )}
@@ -66,16 +66,16 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
               </div>
 
               {/* Judul & Deskripsi */}
-              <h4 className="font-semibold text-slate-100 text-sm group-hover:text-indigo-300 transition-colors">
+              <h4 className="font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors">
                 {preset.name}
               </h4>
-              <p className="mt-1 text-xs text-slate-400 leading-relaxed line-clamp-2">
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed line-clamp-2">
                 {preset.description}
               </p>
 
               {/* Garis Aksen Bawah jika aktif */}
               {isSelected && (
-                <div className="absolute inset-x-0 bottom-0 h-1 rounded-b-xl bg-gradient-to-r from-indigo-500 to-pink-500" />
+                <div className="absolute inset-x-0 bottom-0 h-1.5 rounded-b-2xl bg-gradient-to-r from-emerald-500 to-teal-500" />
               )}
             </button>
           )
@@ -84,4 +84,3 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
     </div>
   )
 }
-

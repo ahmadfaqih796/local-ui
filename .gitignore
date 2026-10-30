@@ -1,6 +1,8 @@
 # Folders
 .agents/
 docs/
+storage_drive/*
+!storage_drive/.gitkeep
 # Logs
 logs
 *.log
