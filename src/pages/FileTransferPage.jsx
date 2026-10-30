@@ -3,6 +3,7 @@ import {
   Wifi,
   HardDrive,
   Zap,
+  Mountain,
 } from 'lucide-react'
 import { StorageBanner } from '@/features/file-transfer/components/StorageBanner'
 import { UploadDropzone } from '@/features/file-transfer/components/UploadDropzone'
@@ -84,8 +85,8 @@ export function FileTransferPage() {
           onRefresh={refreshFiles}
         />
 
-        {/* 4. Tiga Pilar Keunggulan Penyimpanan Wi-Fi Lokal */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        {/* 4. Pilar Keunggulan Penyimpanan Wi-Fi Lokal & Hotspot Mandiri */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
           <div className="rounded-2xl border border-emerald-200 bg-white p-4 space-y-2 shadow-xs">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200">
               <Wifi className="h-4 w-4" />
@@ -110,9 +111,19 @@ export function FileTransferPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-700 border border-green-200">
               <Zap className="h-4 w-4" />
             </div>
-            <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Kecepatan Wi-Fi / LAN Maksimal</h4>
+            <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Kecepatan Maksimal</h4>
             <p className="text-[11px] text-slate-500 leading-relaxed">
               Tidak ada limit ukuran file (bisa gigabyte-an) dengan kecepatan penuh jaringan lokal tanpa batasan cloud.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-200 bg-white p-4 space-y-2 shadow-xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-lime-100 text-lime-800 border border-lime-200">
+              <Mountain className="h-4 w-4" />
+            </div>
+            <h4 className="font-bold text-slate-900 text-xs sm:text-sm">Bisa di Gunung & Outdoor</h4>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Tanpa perlu router atau modem. Cukup nyalakan Mobile Hotspot laptop atau HP, transfer langsung jalan.
             </p>
           </div>
         </div>

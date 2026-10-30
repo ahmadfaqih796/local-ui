@@ -2,6 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import { exec } from 'node:child_process'
 
 /**
  * Plugin Vite untuk Layanan Penyimpanan Berkas Lokal (Wi-Fi Shared Storage Hub)
@@ -68,25 +69,49 @@ export function localStoragePlugin() {
           return
         }
 
-        // 1. Informasi IP Jaringan Lokal (Wi-Fi)
+        // 1. Informasi IP Jaringan Lokal (Wi-Fi & Hotspot Mandiri)
         if (req.method === 'GET' && urlObj.pathname === '/api/storage/network-info') {
           const nets = os.networkInterfaces()
           let localIp = '127.0.0.1'
+          const interfaces = []
 
-          // Cari interface Wi-Fi atau Ethernet non-internal
+          // Cari interface Wi-Fi, Hotspot Laptop, atau Ethernet non-internal
           for (const name of Object.keys(nets)) {
             for (const net of nets[name] || []) {
               if (net.family === 'IPv4' && !net.internal && !net.address.startsWith('169.254')) {
-                if (
-                  name.toLowerCase().includes('wi-fi') ||
-                  name.toLowerCase().includes('wlan') ||
-                  localIp === '127.0.0.1'
-                ) {
+                const lowerName = name.toLowerCase()
+                const isHotspot =
+                  net.address.startsWith('192.168.137') ||
+                  lowerName.includes('direct') ||
+                  lowerName.includes('hotspot')
+                const isWifi = lowerName.includes('wi-fi') || lowerName.includes('wlan')
+                const isEthernet = lowerName.includes('ethernet') || lowerName.includes('eth')
+
+                let type = 'other'
+                if (isHotspot) type = 'hotspot'
+                else if (isWifi) type = 'wifi'
+                else if (isEthernet) type = 'ethernet'
+
+                interfaces.push({
+                  name,
+                  ip: net.address,
+                  type,
+                  isHotspot,
+                  label: isHotspot
+                    ? `Hotspot Laptop Mandiri (${net.address})`
+                    : isWifi
+                      ? `Wi-Fi (${net.address})`
+                      : `${name} (${net.address})`,
+                })
+
+                if (isHotspot || isWifi || localIp === '127.0.0.1') {
                   localIp = net.address
                 }
               }
             }
           }
+
+          const isHotspotActive = interfaces.some((i) => i.isHotspot)
 
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(
@@ -94,8 +119,23 @@ export function localStoragePlugin() {
               ip: localIp,
               port: 5173,
               url: `http://${localIp}:5173`,
+              interfaces,
+              isHotspotActive,
             })
           )
+          return
+        }
+
+        // Endpoint Membuka Pengaturan Mobile Hotspot Windows
+        if (req.method === 'POST' && urlObj.pathname === '/api/storage/open-hotspot-settings') {
+          try {
+            exec('start ms-settings:network-mobilehotspot')
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ success: true }))
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ error: err.message }))
+          }
           return
         }
 

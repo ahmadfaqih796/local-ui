@@ -145,4 +145,23 @@ export function subscribeToFileChanges(onFileChange = () => {}) {
   }
 }
 
+/**
+ * Membuka menu pengaturan Mobile Hotspot Windows langsung dari aplikasi
+ * @returns {Promise<boolean>}
+ */
+export async function openWindowsHotspotSettings() {
+  try {
+    const res = await fetch('/api/storage/open-hotspot-settings', {
+      method: 'POST',
+    })
+    return res.ok
+  } catch (err) {
+    console.warn('Gagal membuka pengaturan hotspot via API:', err)
+    // Fallback: buka link protocol langsung
+    window.location.href = 'ms-settings:network-mobilehotspot'
+    return false
+  }
+}
+
+
 
