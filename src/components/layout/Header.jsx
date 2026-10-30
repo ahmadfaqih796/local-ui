@@ -13,7 +13,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-green-200/80 bg-white/95 backdrop-blur-md shadow-xs">
+      <header className="sticky top-0 z-40 border-b border-green-200/80 bg-surface/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
             {/* Logo & Identitas Aplikasi */}

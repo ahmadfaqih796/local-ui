@@ -104,13 +104,13 @@ export function UploadDropzone({ onUploadSuccess = () => {} }) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`group relative overflow-hidden rounded-3xl border-2 border-dashed p-5 sm:p-8 text-center transition-all duration-300 cursor-pointer ${
+        className={`group relative overflow-hidden rounded-3xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 cursor-pointer ${
           isDragging
             ? 'border-emerald-500 bg-emerald-100/50 scale-[1.01] shadow-lg shadow-emerald-500/15 ring-2 ring-emerald-400'
-            : 'border-emerald-300/80 bg-white hover:border-emerald-500 hover:bg-emerald-50/40 hover:shadow-md'
+            : 'border-emerald-300/80 bg-surface hover:border-emerald-500 hover:bg-emerald-50/40 hover:shadow-md'
         }`}
       >
-        <div className="relative flex flex-col items-center justify-center space-y-3.5">
+        <div className="relative flex flex-col items-center justify-center space-y-3.5 w-full">
           <div
             className={`flex h-16 w-16 items-center justify-center rounded-2xl border transition-all duration-300 ${
               isDragging
@@ -121,8 +121,8 @@ export function UploadDropzone({ onUploadSuccess = () => {} }) {
             <UploadCloud className="h-8 w-8 transition-transform group-hover:-translate-y-0.5" />
           </div>
 
-          <div className="space-y-1 max-w-md">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          <div className="space-y-1 w-full max-w-lg mx-auto text-center">
+            <h3 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
               Tarik Berkas ke Sini untuk Disimpan di Laptop
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -142,7 +142,7 @@ export function UploadDropzone({ onUploadSuccess = () => {} }) {
 
       {/* Daftar Upload Aktif */}
       {activeUploads.length > 0 && (
-        <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm space-y-3">
+        <div className="rounded-2xl border border-emerald-200 bg-surface p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
             <span>Mengunggah ke Storage Laptop ({activeUploads.length})</span>
           </div>

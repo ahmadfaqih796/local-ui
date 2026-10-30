@@ -58,7 +58,7 @@ export function HotspotGuidePanel({ isHotspotActive = false }) {
 
       {/* 3 Langkah Praktis */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-        <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-1 shadow-2xs">
+        <div className="rounded-xl border border-emerald-200 bg-surface p-3 space-y-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]">
               1
@@ -70,7 +70,7 @@ export function HotspotGuidePanel({ isHotspotActive = false }) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-1 shadow-2xs">
+        <div className="rounded-xl border border-emerald-200 bg-surface p-3 space-y-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]">
               2
@@ -82,7 +82,7 @@ export function HotspotGuidePanel({ isHotspotActive = false }) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-1 shadow-2xs">
+        <div className="rounded-xl border border-emerald-200 bg-surface p-3 space-y-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]">
               3

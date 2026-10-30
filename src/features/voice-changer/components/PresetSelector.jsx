@@ -42,7 +42,7 @@ export function PresetSelector({ selectedPresetId, onSelectPreset }) {
               className={`group relative flex flex-col items-start p-4 rounded-2xl text-left transition-all duration-200 border cursor-pointer ${
                 isSelected
                   ? 'border-emerald-500 bg-emerald-50/90 shadow-md ring-2 ring-emerald-500/50'
-                  : 'border-emerald-200/90 bg-white hover:bg-emerald-50/50 hover:border-emerald-300 shadow-xs'
+                  : 'border-emerald-200/90 bg-surface hover:bg-emerald-50/50 hover:border-emerald-300 shadow-xs'
               }`}
             >
               {/* Header Kartu: Ikon & Badge */}

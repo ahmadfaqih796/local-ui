@@ -30,6 +30,7 @@
   /* Border Tokens */
   --color-border-default: #e2e8f0;
   --color-border: #e2e8f0;
+  --color-default: #e2e8f0;
 
   /* Text Tokens */
   --color-text-primary: #0f172a;
@@ -41,8 +42,6 @@
   --color-success: #22c55e;
   --color-danger: #ef4444;
 
-  /* Space & Radius Tokens */
-  --spacing-md: 1rem; /* 16px */
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

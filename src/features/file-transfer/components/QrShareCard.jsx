@@ -26,7 +26,7 @@ export function QrShareCard({ shareUrl = '' }) {
 
   return (
     <div className="flex flex-col items-center shrink-0 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm backdrop-blur-md w-full sm:w-auto">
-      <div className="rounded-xl overflow-hidden border border-emerald-200 shadow-sm p-2 bg-white">
+      <div className="rounded-xl overflow-hidden border border-emerald-200 shadow-sm p-2 bg-surface">
         {qrDataUrl ? (
           <img
             src={qrDataUrl}

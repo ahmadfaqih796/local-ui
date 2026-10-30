@@ -26,7 +26,7 @@ export function SimpleMeetingCard({
   onOpenGuide = () => {},
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-white p-6 shadow-sm space-y-5">
+    <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-surface p-6 shadow-sm space-y-5">
       {/* Ambient glow lembut */}
       <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-emerald-100/60 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-green-100/60 blur-3xl pointer-events-none" />
@@ -128,7 +128,7 @@ export function SimpleMeetingCard({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           {/* Solusi 1: Pakai Headset */}
-          <div className="p-3 rounded-xl bg-white border border-emerald-200 space-y-1.5 shadow-xs">
+          <div className="p-3 rounded-xl bg-surface border border-emerald-200 space-y-1.5 shadow-xs">
             <div className="flex items-center gap-1.5 font-bold text-slate-900">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">1</span>
               <span>Gunakan Headset / Earphone HP</span>
@@ -142,7 +142,7 @@ export function SimpleMeetingCard({
           </div>
 
           {/* Solusi 2: Noise Gate Otomatis */}
-          <div className="p-3 rounded-xl bg-white border border-emerald-200 space-y-1.5 shadow-xs">
+          <div className="p-3 rounded-xl bg-surface border border-emerald-200 space-y-1.5 shadow-xs">
             <div className="flex items-center gap-1.5 font-bold text-slate-900">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-white text-[10px]">2</span>
               <span>Noise Gate Otomatis Aktif</span>
@@ -159,7 +159,7 @@ export function SimpleMeetingCard({
       </div>
 
       {/* Status Jalur Otomatis */}
-      <div className="rounded-2xl border border-emerald-200 bg-white p-4 space-y-3 shadow-xs">
+      <div className="rounded-2xl border border-emerald-200 bg-surface p-4 space-y-3 shadow-xs">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <span className="font-bold text-slate-800 flex items-center gap-1.5">
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />

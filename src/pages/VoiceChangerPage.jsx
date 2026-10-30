@@ -120,14 +120,14 @@ export function VoiceChangerPage() {
             <VoiceVisualizer isActive={isActive} isMuted={isMuted} />
 
             {/* Kotak Petunjuk Anti-Mantul Singkat */}
-            <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-xs text-slate-600 shadow-xs space-y-2">
-              <p className="font-semibold text-slate-800 flex items-center gap-2">
+            <div className="rounded-2xl border border-emerald-200 bg-surface p-4 text-xs text-slate-600 shadow-xs space-y-2">
+              <p className="font-semibold text-text-primary flex items-center gap-2">
                 <span>🛡️ Status Jalur Audio Google Meet:</span>
               </p>
               <ul className="space-y-1 text-slate-600 text-[11px] list-disc list-inside">
                 <li>Google Meet Mikrofon: <strong className="text-emerald-800">CABLE Output (VB-Audio)</strong>.</li>
-                <li>Google Meet Speaker: <strong className="text-slate-800">Speaker (Realtek Audio)</strong>.</li>
-                <li>Audio presentasi di Google Meet: <strong className="text-rose-700">NONAKTIF / MATI</strong>.</li>
+                <li>Google Meet Speaker: <strong className="text-text-primary">Speaker (Realtek Audio)</strong>.</li>
+                <li>Audio presentasi di Google Meet: <strong className="text-status-danger font-bold">NONAKTIF / MATI</strong>.</li>
               </ul>
             </div>
           </div>
@@ -142,7 +142,7 @@ export function VoiceChangerPage() {
         </div>
 
         {/* ACCORDION PENGATURAN LANJUTAN (OPSIONAL) */}
-        <div className="rounded-2xl border border-emerald-200/90 bg-white overflow-hidden shadow-xs">
+        <div className="rounded-2xl border border-emerald-200/90 bg-surface overflow-hidden shadow-xs">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}

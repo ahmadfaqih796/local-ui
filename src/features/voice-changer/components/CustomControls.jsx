@@ -19,7 +19,7 @@ export function CustomControls({
   const distortion = params.distortion ?? 0
 
   return (
-    <div className="rounded-2xl border border-emerald-200/90 bg-white p-5 shadow-xs">
+    <div className="rounded-2xl border border-emerald-200/90 bg-surface p-5 shadow-xs">
       {/* Header Panel Kontrol */}
       <div className="mb-4 flex items-center justify-between border-b border-emerald-100 pb-3">
         <div className="flex items-center gap-2">

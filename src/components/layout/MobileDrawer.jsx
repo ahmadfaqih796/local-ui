@@ -31,7 +31,7 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
       />
 
       {/* Drawer Slide-in Panel (Dari Kanan) */}
-      <aside className="fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] bg-white border-l border-emerald-200 p-5 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
+      <aside className="fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] bg-surface border-l border-emerald-200 p-5 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
         {/* Drawer Header */}
         <div>
           <div className="flex items-center justify-between border-b border-emerald-100 pb-4 mb-5">

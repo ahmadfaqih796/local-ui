@@ -30,12 +30,12 @@ export function VoiceVisualizer({ isActive, isMuted }) {
       const width = canvas.width
       const height = canvas.height
 
-      // Bersihkan canvas dengan latar belakang gelap pekat
-      ctx.fillStyle = '#0b0f19'
+      // Bersihkan canvas dengan latar belakang terang segar (Studio Clean Light)
+      ctx.fillStyle = '#f8fafc' // Token bg-page Figma
       ctx.fillRect(0, 0, width, height)
 
       // Gambar grid latar belakang tipis bergaya studio audio
-      ctx.strokeStyle = 'rgba(55, 65, 81, 0.25)'
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)'
       ctx.lineWidth = 1
       ctx.beginPath()
       for (let x = 0; x < width; x += 30) {
@@ -50,7 +50,7 @@ export function VoiceVisualizer({ isActive, isMuted }) {
 
       // Jika mikrofon tidak aktif atau di-mute
       if (!isActive || isMuted) {
-        ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)'
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)'
         ctx.lineWidth = 2
         ctx.beginPath()
         ctx.moveTo(0, height / 2)
@@ -153,7 +153,7 @@ export function VoiceVisualizer({ isActive, isMuted }) {
   }, [isActive, isMuted, viewMode])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-emerald-200/90 bg-white p-4 shadow-xs">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-200/90 bg-surface p-4 shadow-xs">
       {/* Header Visualizer */}
       <div className="mb-3 flex items-center justify-between border-b border-emerald-100 pb-3">
         <div className="flex items-center gap-2.5">
@@ -206,16 +206,16 @@ export function VoiceVisualizer({ isActive, isMuted }) {
         </div>
       </div>
 
-      {/* Area Layar Canvas */}
-      <div className="relative h-44 w-full rounded-xl overflow-hidden border border-slate-900/10 bg-slate-950 shadow-inner">
+      {/* Area Layar Canvas - Studio Light Fresh Green */}
+      <div className="relative h-44 w-full rounded-xl overflow-hidden border border-emerald-200/90 bg-page shadow-inner">
         <canvas ref={canvasRef} className="h-full w-full block" />
 
         {/* Overlay saat non-aktif */}
         {!isActive && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xs text-center p-4">
-            <Radio className="h-8 w-8 text-slate-500 mb-2 animate-pulse" />
-            <p className="text-sm font-semibold text-slate-200">Mikrofon Belum Dinyalakan</p>
-            <p className="text-xs text-slate-400 mt-0.5">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/85 backdrop-blur-xs text-center p-4">
+            <Radio className="h-8 w-8 text-emerald-600 mb-2 animate-pulse" />
+            <p className="text-sm font-bold text-text-primary">Mikrofon Belum Dinyalakan</p>
+            <p className="text-xs text-slate-500 mt-0.5">
               Klik tombol &quot;Mulai Pengubah Suara&quot; di atas untuk mendengar suara vokal
             </p>
           </div>

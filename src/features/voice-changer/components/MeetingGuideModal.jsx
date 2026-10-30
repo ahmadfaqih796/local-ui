@@ -20,7 +20,7 @@ export function MeetingGuideModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-emerald-200 bg-white p-6 shadow-2xl text-slate-800">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-emerald-200 bg-surface p-6 shadow-2xl text-text-primary">
         {/* Tombol Tutup */}
         <button
           type="button"
@@ -36,7 +36,7 @@ export function MeetingGuideModal({ isOpen, onClose }) {
             <Laptop className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-text-primary">
               Panduan Jalur Mikrofon &amp; Anti-Mantul (Anti-Echo)
             </h2>
             <p className="text-xs text-slate-500">

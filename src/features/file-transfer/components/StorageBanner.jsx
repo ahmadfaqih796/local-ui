@@ -42,7 +42,7 @@ export function StorageBanner({
   const availableInterfaces = networkInfo?.interfaces || []
 
   return (
-    <div className="rounded-3xl border border-emerald-200 bg-white p-5 sm:p-7 shadow-sm relative overflow-hidden space-y-6">
+    <div className="rounded-3xl border border-emerald-200 bg-surface p-5 sm:p-7 shadow-sm relative overflow-hidden space-y-6">
       {/* Efek Cahaya Halus Fresh Green */}
       <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-emerald-100/60 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-green-100/60 blur-3xl pointer-events-none" />
@@ -58,7 +58,7 @@ export function StorageBanner({
             }}
             className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
               activeMode === 'wifi'
-                ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200'
+                ? 'bg-surface text-emerald-800 shadow-xs border border-emerald-200'
                 : 'text-slate-600 hover:text-emerald-700'
             }`}
           >
@@ -90,7 +90,7 @@ export function StorageBanner({
             <select
               value={selectedIp}
               onChange={(e) => setCustomIp(e.target.value)}
-              className="rounded-xl border border-emerald-300 bg-white px-2.5 py-1 text-xs font-mono font-semibold text-emerald-950 focus:outline-emerald-500 cursor-pointer shadow-xs"
+              className="rounded-xl border border-emerald-300 bg-surface px-2.5 py-1 text-xs font-mono font-semibold text-emerald-950 focus:outline-emerald-500 cursor-pointer shadow-xs"
             >
               {availableInterfaces.map((iface) => (
                 <option key={iface.ip} value={iface.ip}>

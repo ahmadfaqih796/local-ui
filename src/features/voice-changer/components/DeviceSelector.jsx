@@ -51,7 +51,7 @@ export function DeviceSelector({
       !selectedOutputDevice?.label.toLowerCase().includes('output'))
 
   return (
-    <div className="rounded-2xl border border-emerald-200/90 bg-white p-5 shadow-xs space-y-4">
+    <div className="rounded-2xl border border-emerald-200/90 bg-surface p-5 shadow-xs space-y-4">
       {/* Header Panel Perangkat */}
       <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
         <div className="flex items-center gap-2">
