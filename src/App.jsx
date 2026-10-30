@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { Header } from '@/components/layout/Header'
+import { AppHubPage } from '@/pages/AppHubPage'
 import { VoiceChangerPage } from '@/pages/VoiceChangerPage'
 import { FileTransferPage } from '@/pages/FileTransferPage'
 
@@ -25,10 +26,11 @@ export function App() {
         {/* Sistem Navigasi Halaman dengan React Router */}
         <div className="flex-1">
           <Routes>
-            <Route path="/" element={<VoiceChangerPage />} />
+            <Route path="/" element={<AppHubPage />} />
+            <Route path="/hub" element={<AppHubPage />} />
             <Route path="/voice-changer" element={<VoiceChangerPage />} />
             <Route path="/file-transfer" element={<FileTransferPage />} />
-            <Route path="*" element={<Navigate to="/file-transfer" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Radio, Mic, FolderSync, Wifi, Menu } from 'lucide-react'
+import { Radio, Mic, FolderSync, Wifi, Menu, Store } from 'lucide-react'
 
 import { MobileDrawer } from './MobileDrawer'
 
@@ -17,7 +17,7 @@ export function Header() {
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-3">
             {/* Logo & Identitas Aplikasi */}
-            <NavLink to="/file-transfer" className="flex items-center gap-2.5 shrink-0">
+            <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
               <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-linear-to-tr from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20">
                 <Radio className="h-5 w-5 animate-pulse" />
               </div>
@@ -31,37 +31,51 @@ export function Header() {
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block">
-                  Utilitas Lokal: Voice Changer Meeting &amp; Penyimpanan Wi-Fi Bersama
+                  Wadah Utilitas: Vending Hub, Voice Changer &amp; Wi-Fi Storage
                 </p>
               </div>
             </NavLink>
 
             {/* Desktop Navigation Tabs (Hidden on mobile < md) */}
-            <nav className="hidden md:flex items-center rounded-2xl bg-green-100/70 border border-green-200 p-1 shadow-inner">
+            <nav className="hidden md:flex items-center rounded-2xl bg-green-100/70 border border-green-200 p-1 shadow-inner gap-1">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isActive
+                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                    : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
+                  }`
+                }
+              >
+                <Store className="h-3.5 w-3.5" />
+                <span>Vending Hub</span>
+              </NavLink>
+
               <NavLink
                 to="/voice-changer"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${isActive
+                  `flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isActive
                     ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                     : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
                   }`
                 }
               >
                 <Mic className="h-3.5 w-3.5" />
-                <span>Pengubah Suara Mic</span>
+                <span>Voice Changer</span>
               </NavLink>
 
               <NavLink
                 to="/file-transfer"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${isActive
+                  `flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isActive
                     ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
                     : 'text-emerald-900 hover:text-emerald-950 hover:bg-white/80'
                   }`
                 }
               >
                 <FolderSync className="h-3.5 w-3.5" />
-                <span>Kirim File (LAN / Wi-Fi)</span>
+                <span>Storage &amp; File</span>
                 <span className="rounded-md bg-emerald-200/90 px-1.5 py-0.2 text-[9px] font-extrabold text-emerald-900 border border-emerald-300">
                   LOKAL
                 </span>

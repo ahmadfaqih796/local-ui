@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Radio, Mic, FolderSync, X, ChevronRight, ShieldCheck } from 'lucide-react'
+import { Radio, Mic, FolderSync, X, ChevronRight, ShieldCheck, Store } from 'lucide-react'
 
 /**
  * Komponen Sidebar Drawer Mobile dengan Backdrop Blur & Penguncian Scroll
@@ -62,8 +62,35 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
           {/* Section Navigasi */}
           <div className="space-y-2">
             <p className="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-1 mb-2">
-              Fitur Utama
+              Fitur Utama Wadah
             </p>
+
+            {/* NavLink 0: Vending Hub / Beranda */}
+            <NavLink
+              to="/"
+              end
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                  isActive
+                    ? 'border-emerald-300 bg-emerald-50/90 text-emerald-950 font-bold shadow-xs'
+                    : 'border-transparent text-slate-700 hover:bg-slate-50 hover:border-slate-200'
+                }`
+              }
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <Store className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm block">Vending Hub</span>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    Katalog Dispenser Aplikasi
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-emerald-600 shrink-0" />
+            </NavLink>
 
             {/* NavLink 1: Pengubah Suara Mic */}
             <NavLink
