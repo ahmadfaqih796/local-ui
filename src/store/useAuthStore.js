@@ -89,13 +89,75 @@ export const useAuthStore = create(
         }
 
         toast.error('Saldo Koin Vending Tidak Cukup', {
-          description: 'Silakan isi ulang koin untuk melanjutkan penggunaan fitur ini.',
+          description: 'Silakan isi ulang koin atau tukar voucher aktivitas platform.',
           action: {
-            label: 'Top Up',
+            label: 'Buka Dompet',
             onClick: () => get().openPaymentModal(),
           },
         })
         return false
+      },
+
+      // Aksi Klaim / Tukar Voucher Aktivitas Platform (Integrasi Ekosistem JC / Pak Paul)
+      redeemVoucher: (rawCode) => {
+        const code = (rawCode || '').trim().toUpperCase()
+        if (!code) {
+          toast.error('Kode Voucher Kosong', {
+            description: 'Silakan masukkan kode voucher atau token integrasi platform.',
+          })
+          return { success: false, message: 'Kode kosong' }
+        }
+
+        // 1. Lisensi Pro Eksklusif Komunitas / Platform (Contoh: JCPRO, PAKPAUL, LOCALPRO, TRAINERJC)
+        if (['JCPRO', 'PAKPAUL', 'LOCALPRO', 'TRAINERJC'].includes(code)) {
+          set((state) => ({
+            user: {
+              ...state.user,
+              role: 'pro',
+              isPro: true,
+              name: 'Mitra Platform JC',
+            },
+            tokens: state.tokens + 25,
+            unlockedApps: Array.from(new Set([...state.unlockedApps, 'ai-transcriber'])),
+            isPaymentModalOpen: false,
+            paymentIntent: null,
+          }))
+          toast.success(`🎉 Voucher "${code}" Diterima!`, {
+            description: 'Selamat! Akun Anda aktif sebagai Lisensi PRO Komunitas (+25 Koin Vending).',
+          })
+          return { success: true, type: 'pro', tokens: 25 }
+        }
+
+        // 2. Token Aktivitas Belajar / Koin Reward Platform (Contoh: AKTIVITAS10, DEMO10, KOIN10, VENDING2026, PLATFORM10)
+        if (['AKTIVITAS10', 'DEMO10', 'KOIN10', 'VENDING2026', 'PLATFORM10'].includes(code)) {
+          set((state) => ({
+            tokens: state.tokens + 10,
+            isPaymentModalOpen: false,
+            paymentIntent: null,
+          }))
+          toast.success(`🎉 Voucher "${code}" Berhasil Diklaim!`, {
+            description: '+10 Koin Aktivitas Vending telah ditambahkan ke dompet Anda.',
+          })
+          return { success: true, type: 'tokens', tokens: 10 }
+        }
+
+        // 3. Trial Bonus Starter (Contoh: COIN5, TRIAL5, FREEDEMO, WELCOME)
+        if (['COIN5', 'TRIAL5', 'FREEDEMO', 'WELCOME'].includes(code)) {
+          set((state) => ({
+            tokens: state.tokens + 5,
+            isPaymentModalOpen: false,
+            paymentIntent: null,
+          }))
+          toast.success(`🎉 Voucher Bonus "${code}" Berhasil!`, {
+            description: '+5 Koin Uji Coba telah masuk ke saldo dompet Anda.',
+          })
+          return { success: true, type: 'tokens', tokens: 5 }
+        }
+
+        toast.error('Kode Voucher Tidak Valid', {
+          description: 'Kode voucher atau kupon aktivitas platform tidak terdaftar atau sudah kedaluwarsa.',
+        })
+        return { success: false, message: 'Kode voucher tidak valid' }
       },
 
       // Reset State untuk Kebutuhan Demo Ulang ke Pak Paul

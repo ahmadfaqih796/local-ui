@@ -7,6 +7,7 @@ import {
 import { useAudioEngine } from '@/features/voice-changer/hooks/useAudioEngine'
 import { useAudioDevices } from '@/features/voice-changer/hooks/useAudioDevices'
 import { SimpleMeetingCard } from '@/features/voice-changer/components/SimpleMeetingCard'
+import { VoiceDemoPlayground } from '@/features/voice-changer/components/VoiceDemoPlayground'
 import { VoiceVisualizer } from '@/features/voice-changer/components/VoiceVisualizer'
 import { PresetSelector } from '@/features/voice-changer/components/PresetSelector'
 import { CustomControls } from '@/features/voice-changer/components/CustomControls'
@@ -99,19 +100,29 @@ export function VoiceChangerPage() {
   return (
     <div className="min-h-screen text-slate-800 pb-20 sm:pb-12">
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* KARTU UTAMA 1-KLIK (ZERO CONFIGURATION) */}
-        <SimpleMeetingCard
-          isActive={isActive}
-          isMuted={isMuted}
-          isMonitoring={isMonitoring}
-          physicalMicLabel={physicalMicObj?.label || 'Intel Smart Sound / Realtek Mic'}
-          virtualCableLabel={virtualCableObj?.label || 'CABLE Input (VB-Audio)'}
-          hasVirtualCable={hasVirtualCable}
-          onToggleMic={handleSimpleToggle}
-          onToggleMute={() => setMuted(!isMuted)}
-          onToggleMonitoring={setMonitoring}
-          onOpenGuide={() => setIsGuideOpen(true)}
+        {/* FITUR INOVASI 1: PLAYGROUND UJI COBA SUARA ONLINE (SANDBOX 100% AMAN BEBAS VIRUS) */}
+        <VoiceDemoPlayground
+          onOpenMeetingMode={() => {
+            const el = document.getElementById('meeting-mode-card')
+            el?.scrollIntoView({ behavior: 'smooth' })
+          }}
         />
+
+        {/* FITUR INOVASI 2: KARTU UTAMA MODE RAPAT 1-KLIK (ZERO CONFIGURATION LIVE VB-CABLE) */}
+        <div id="meeting-mode-card">
+          <SimpleMeetingCard
+            isActive={isActive}
+            isMuted={isMuted}
+            isMonitoring={isMonitoring}
+            physicalMicLabel={physicalMicObj?.label || 'Intel Smart Sound / Realtek Mic'}
+            virtualCableLabel={virtualCableObj?.label || 'CABLE Input (VB-Audio)'}
+            hasVirtualCable={hasVirtualCable}
+            onToggleMic={handleSimpleToggle}
+            onToggleMute={() => setMuted(!isMuted)}
+            onToggleMonitoring={setMonitoring}
+            onOpenGuide={() => setIsGuideOpen(true)}
+          />
+        </div>
 
         {/* AREA INTI: PILIHAN PRESET CEPAT & VISUALIZER */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
