@@ -4,6 +4,7 @@ import { VendingFilterTabs } from '@/features/app-hub/components/VendingFilterTa
 import { AppVendingCard } from '@/features/app-hub/components/AppVendingCard'
 import { AuthPaymentPreviewModal } from '@/features/app-hub/components/AuthPaymentPreviewModal'
 import { APP_REGISTRY } from '@/features/app-hub/constants/appList'
+import { Button } from '@/components'
 import { Store, Inbox } from 'lucide-react'
 
 /**
@@ -73,16 +74,15 @@ export function AppHubPage() {
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
             Tidak ditemukan aplikasi untuk kata kunci &quot;{searchQuery}&quot;. Coba cari kata kunci lain atau pilih kategori &quot;Semua Aplikasi&quot;.
           </p>
-          <button
-            type="button"
+          <Button
+            variant="emerald-outline"
             onClick={() => {
               setSelectedCategory('all')
               setSearchQuery('')
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 px-4 py-2 text-xs font-bold hover:bg-emerald-200 transition-all cursor-pointer"
           >
             Reset Pencarian
-          </button>
+          </Button>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Copy, Check, QrCode, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
-import { Modal } from '@/components/Modal'
+import { Modal, Button } from '@/components'
 
 /**
  * Modal Petunjuk Pairing & Kode Ruangan 6-Digit
@@ -52,14 +52,14 @@ export function PairingModal({
           <span className="text-[11px] text-slate-500 hidden sm:inline">
             Pastikan kedua perangkat berada di Wi-Fi / Hotspot yang sama.
           </span>
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            iconRight={<ArrowRight className="h-3.5 w-3.5" />}
             onClick={onClose}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 transition-all cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95 ml-auto"
+            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 ml-auto"
           >
-            <span>Mengerti &amp; Tutup</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
+            Mengerti &amp; Tutup
+          </Button>
         </div>
       }
     >
@@ -80,18 +80,21 @@ export function PairingModal({
           ))}
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={
+            copied ? (
+              <Check className="h-3.5 w-3.5 text-emerald-600" />
+            ) : (
+              <Copy className="h-3.5 w-3.5 text-indigo-600" />
+            )
+          }
           onClick={handleCopyCode}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-300 bg-surface px-4 py-1.5 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 transition-all cursor-pointer shadow-2xs active:scale-95"
+          className="border-indigo-200 text-indigo-800 hover:bg-indigo-50"
         >
-          {copied ? (
-            <Check className="h-3.5 w-3.5 text-emerald-600" />
-          ) : (
-            <Copy className="h-3.5 w-3.5" />
-          )}
-          <span>{copied ? 'Tersalin!' : 'Salin Kode'}</span>
-        </button>
+          {copied ? 'Tersalin!' : 'Salin Kode'}
+        </Button>
       </div>
 
       {/* Langkah Petunjuk */}

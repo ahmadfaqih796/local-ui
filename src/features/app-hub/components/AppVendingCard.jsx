@@ -11,6 +11,7 @@ import {
   Activity,
   Layers,
 } from 'lucide-react'
+import { Card, Badge, Button } from '@/components'
 
 // Mapping ikon dinamis
 const ICON_MAP = {
@@ -22,17 +23,19 @@ const ICON_MAP = {
 
 /**
  * Kartu Slot Aplikasi Vending Machine (Local App Card)
- * Mewakili satu produk "snack / softdrink" utilitas lokal dalam wadah vending machine
+ * Menggunakan komponen reusable Card, Badge, dan Button
  */
 export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
   const IconComponent = ICON_MAP[app.iconName] || Layers
   const isLocked = app.status === 'coming_soon' || !app.pricing?.isUnlocked
 
   return (
-    <div
-      className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border ${
+    <Card
+      hover
+      padding="md"
+      className={`group flex flex-col justify-between ${
         app.borderColor || 'border-emerald-200/90'
-      } bg-surface p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10`}
+      }`}
     >
       {/* Background Soft Glow */}
       <div
@@ -57,25 +60,14 @@ export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
           </div>
 
           <div className="flex flex-col items-end gap-1.5">
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                isLocked
-                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                  : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-              }`}
+            <Badge
+              variant={isLocked ? 'amber' : 'emerald'}
+              dot={!isLocked}
+              pulse={!isLocked}
+              icon={isLocked ? <Lock className="h-3 w-3" /> : null}
             >
-              {isLocked ? (
-                <>
-                  <Lock className="h-3 w-3" />
-                  <span>{app.badge}</span>
-                </>
-              ) : (
-                <>
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{app.badge}</span>
-                </>
-              )}
-            </span>
+              {app.badge}
+            </Badge>
 
             <span className="text-[10px] font-mono text-slate-500 font-medium">
               {app.version}
@@ -130,14 +122,14 @@ export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
 
         {/* Tombol Peluncuran */}
         {isLocked ? (
-          <button
-            type="button"
+          <Button
+            variant="amber"
+            icon={<Lock className="h-3.5 w-3.5" />}
             onClick={() => onOpenDetails(app)}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-900 px-4 py-2.5 text-xs font-bold hover:bg-amber-500 hover:text-white transition-all cursor-pointer shadow-2xs active:scale-95"
+            className="w-full"
           >
-            <Lock className="h-3.5 w-3.5" />
-            <span>Lihat Jalur Pembayaran &amp; Lisensi</span>
-          </button>
+            Lihat Jalur Pembayaran &amp; Lisensi
+          </Button>
         ) : (
           <Link
             to={app.route}
@@ -148,7 +140,6 @@ export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
           </Link>
         )}
       </div>
-    </div>
+    </Card>
   )
 }
-

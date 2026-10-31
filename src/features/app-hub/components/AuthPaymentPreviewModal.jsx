@@ -8,7 +8,7 @@ import {
   Layers,
   ArrowRight,
 } from 'lucide-react'
-import { Modal } from '@/components/Modal'
+import { Modal, Button, Badge } from '@/components'
 
 /**
  * Modal Pratinjau Desain Jalur Otentikasi & Payment (Permintaan Pak Paul)
@@ -22,10 +22,13 @@ export function AuthPaymentPreviewModal({ isOpen, onClose = () => {} }) {
       maxWidth="2xl"
       icon={<CreditCard className="h-5 w-5 text-emerald-600" />}
       badge={
-        <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-          <Sparkles className="h-3 w-3" />
-          <span>Rancangan Blueprint Vending Machine</span>
-        </div>
+        <Badge
+          variant="emerald"
+          size="sm"
+          icon={<Sparkles className="h-3 w-3" />}
+        >
+          Rancangan Blueprint Vending Machine
+        </Badge>
       }
       title="Jalur Otentikasi & Sistem Pembayaran"
       subtitle="Arsitektur wadah aplikasi untuk monetisasi dan lisensi pengguna"
@@ -34,14 +37,14 @@ export function AuthPaymentPreviewModal({ isOpen, onClose = () => {} }) {
           <span className="text-[11px] text-slate-500 text-center sm:text-left">
             Arsitektur modul ini siap dihubungkan ke API backend / payment gateway pilihan Pak Paul.
           </span>
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            iconRight={<ArrowRight className="h-3.5 w-3.5" />}
             onClick={onClose}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-md shadow-emerald-600/20 active:scale-95"
+            className="w-full sm:w-auto"
           >
-            <span>Tutup &amp; Siap Diuji</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </button>
+            Tutup &amp; Siap Diuji
+          </Button>
         </div>
       }
     >

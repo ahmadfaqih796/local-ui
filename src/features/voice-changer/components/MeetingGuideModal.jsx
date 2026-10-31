@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   VolumeX,
 } from 'lucide-react'
-import { Modal } from '@/components/Modal'
+import { Modal, Button } from '@/components'
 
 /**
  * Modal Dialog Panduan Menghubungkan Jalur Suara Efek ke Jalur Mikrofon Google Meet, Zoom, dan Discord
@@ -29,14 +29,14 @@ export function MeetingGuideModal({ isOpen, onClose = () => {} }) {
           <span className="text-[11px] text-slate-500 hidden sm:inline">
             Pengaturan ini hanya perlu dilakukan 1 kali.
           </span>
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            iconRight={<ArrowRight className="h-4 w-4" />}
             onClick={onClose}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer ml-auto"
+            className="w-full sm:w-auto ml-auto"
           >
-            <span>Mengerti &amp; Siap Rapat</span>
-            <ArrowRight className="h-4 w-4" />
-          </button>
+            Mengerti &amp; Siap Rapat
+          </Button>
         </div>
       }
     >
