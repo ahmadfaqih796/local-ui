@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Sparkles,
   Check,
+  Volume2,
 } from 'lucide-react'
 import { Button, Badge } from '@/components'
 import { toast } from 'sonner'
@@ -148,6 +149,26 @@ ${resultData.transcriptSegments?.map((s) => `[${s.time}] **${s.speaker}:** "${s.
           </button>
         </div>
       </div>
+
+      {/* Pemutar Audio Rekaman Rapat Asli (Jika Tersedia) */}
+      {resultData.audioUrl && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <Volume2 className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-emerald-950 block">
+                Pemutar Rekaman Suara Rapat Asli:
+              </span>
+              <span className="text-[10px] text-slate-500 font-mono">
+                Suara tersimpan di memori browser • Bisa diputar ulang kapan saja
+              </span>
+            </div>
+          </div>
+          <audio controls src={resultData.audioUrl} className="h-8 max-w-sm w-full" />
+        </div>
+      )}
 
       {/* Tab Switcher: Ringkasan vs Action Items vs Transkrip */}
       <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
