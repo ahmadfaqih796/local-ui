@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header'
 import { AppHubPage } from '@/pages/AppHubPage'
 import { VoiceChangerPage } from '@/pages/VoiceChangerPage'
 import { FileTransferPage } from '@/pages/FileTransferPage'
+import { AiTranscriberPage } from '@/pages/AiTranscriberPage'
 import { QrisPaymentModal } from '@/features/app-hub/components/QrisPaymentModal'
 
 /**
@@ -34,6 +35,7 @@ export function App() {
             <Route path="/hub" element={<AppHubPage />} />
             <Route path="/voice-changer" element={<VoiceChangerPage />} />
             <Route path="/file-transfer" element={<FileTransferPage />} />
+            <Route path="/ai-transcriber" element={<AiTranscriberPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

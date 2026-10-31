@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Radio, Mic, FolderSync, Wifi, Menu, Store, Coins, Plus, Crown, User } from 'lucide-react'
+import { Radio, Mic, FolderSync, Wifi, Menu, Store, Coins, Plus, Crown, User, Sparkles } from 'lucide-react'
 
 import { Badge } from '@/components'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -83,6 +83,22 @@ export function Header() {
                 <span>Storage &amp; File</span>
                 <span className="rounded-md bg-emerald-200/90 px-1.5 py-0.2 text-[9px] font-extrabold text-emerald-900 border border-emerald-300">
                   LOKAL
+                </span>
+              </NavLink>
+
+              <NavLink
+                to="/ai-transcriber"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isActive
+                    ? 'bg-amber-600 text-white shadow-sm shadow-amber-600/30'
+                    : 'text-amber-950 hover:text-amber-900 hover:bg-white/80'
+                  }`
+                }
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <span>AI Notulensi</span>
+                <span className="rounded-md bg-amber-200 px-1.5 py-0.2 text-[9px] font-extrabold text-amber-950 border border-amber-300">
+                  PRO
                 </span>
               </NavLink>
             </nav>

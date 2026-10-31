@@ -10,6 +10,7 @@ import {
   Store,
   Coins,
   Plus,
+  Sparkles,
 } from 'lucide-react'
 import { Badge, Button } from '@/components'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -210,6 +211,37 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-emerald-600 shrink-0" />
+            </NavLink>
+
+            {/* NavLink 3: AI Transcriber Notulensi */}
+            <NavLink
+              to="/ai-transcriber"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                  isActive
+                    ? 'border-amber-300 bg-amber-50/90 text-amber-950 font-bold shadow-xs'
+                    : 'border-transparent text-slate-700 hover:bg-slate-50 hover:border-slate-200'
+                }`
+              }
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800 border border-amber-200">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm block">AI Notulensi Rapat</span>
+                    <span className="rounded bg-amber-200 px-1.5 py-0.2 text-[9px] font-extrabold text-amber-950 border border-amber-300">
+                      PRO
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    Transkrip offline Whisper di laptop
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-amber-600 shrink-0" />
             </NavLink>
           </div>
 
