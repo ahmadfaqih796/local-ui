@@ -1,12 +1,29 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Radio, Mic, FolderSync, X, ChevronRight, ShieldCheck, Store } from 'lucide-react'
+import {
+  Radio,
+  Mic,
+  FolderSync,
+  X,
+  ChevronRight,
+  ShieldCheck,
+  Store,
+  Coins,
+  Plus,
+} from 'lucide-react'
+import { Badge, Button } from '@/components'
+import { useAuthStore } from '@/store/useAuthStore'
 
 /**
  * Komponen Sidebar Drawer Mobile dengan Backdrop Blur & Penguncian Scroll
+ * Dilengkapi Info Akun & Dompet Koin Vending
  * @param {{ isOpen: boolean, onClose: () => void }} props
  */
 export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
+  const tokens = useAuthStore((state) => state.tokens)
+  const user = useAuthStore((state) => state.user)
+  const openPaymentModal = useAuthStore((state) => state.openPaymentModal)
+
   // Kunci scroll body saat drawer terbuka di layar mobile
   useEffect(() => {
     if (isOpen) {
@@ -57,6 +74,52 @@ export function MobileDrawer({ isOpen = false, onClose = () => {} }) {
             >
               <X className="h-5 w-5" />
             </button>
+          </div>
+
+          {/* Card Profil & Saldo Koin Mobile */}
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-3 mb-5 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 border border-amber-300 text-amber-900 shadow-2xs">
+                <Coins className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-amber-950">
+                    {tokens} Koin Vending
+                  </span>
+                  {user.isPro ? (
+                    <Badge variant="amber" size="xs">
+                      PRO
+                    </Badge>
+                  ) : (
+                    <Badge variant="neutral" size="xs">
+                      Tamu
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-[10px] font-mono text-slate-500">
+                  ID: {user.machineId}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Plus className="h-3 w-3" />}
+              onClick={() => {
+                onClose()
+                openPaymentModal({
+                  type: 'tokens',
+                  title: 'Top-up 10 Koin Vending',
+                  price: 15000,
+                  tokensCount: 10,
+                })
+              }}
+              className="bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
+            >
+              Top Up
+            </Button>
           </div>
 
           {/* Section Navigasi */}

@@ -1,21 +1,26 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Radio, Mic, FolderSync, Wifi, Menu, Store } from 'lucide-react'
+import { Radio, Mic, FolderSync, Wifi, Menu, Store, Coins, Plus, Crown, User } from 'lucide-react'
 
+import { Badge } from '@/components'
+import { useAuthStore } from '@/store/useAuthStore'
 import { MobileDrawer } from './MobileDrawer'
 
 /**
  * Header Bersih & Segar (Fresh Green Light Theme - Mode Terang)
- * Dilengkapi Navigasi Responsive Desktop & Integrasi Mobile Drawer
+ * Dilengkapi Navigasi Responsive Desktop, Dompet Token Vending, & Integrasi Mobile Drawer
  */
 export function Header() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const tokens = useAuthStore((state) => state.tokens)
+  const user = useAuthStore((state) => state.user)
+  const openPaymentModal = useAuthStore((state) => state.openPaymentModal)
 
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-green-200/80 bg-surface/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-3">
+          <div className="flex h-16 items-center justify-between gap-2 sm:gap-3">
             {/* Logo & Identitas Aplikasi */}
             <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
               <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-linear-to-tr from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20">
@@ -82,28 +87,60 @@ export function Header() {
               </NavLink>
             </nav>
 
-            {/* Indikator Status Jaringan Wi-Fi Tanpa Kuota (Desktop) */}
-            <div className="hidden lg:flex items-center gap-2">
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-3 py-1.5 text-xs text-emerald-800 shadow-xs">
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <Wifi className="h-3.5 w-3.5 text-emerald-600" />
-                <span className="font-mono text-[11px] font-semibold">Bebas Kuota (Wi-Fi)</span>
-              </div>
-            </div>
-
-            {/* Mobile Hamburger Button (Visible only on mobile < md) */}
-            <div className="flex items-center gap-2 md:hidden">
+            {/* Bagian Kanan: Dompet Koin Vending & Status Lisensi */}
+            <div className="flex items-center gap-2">
+              {/* Dompet Koin Vending */}
               <button
                 type="button"
-                onClick={() => setIsDrawerOpen(true)}
-                aria-label="Buka Menu Navigasi"
-                className="flex items-center justify-center h-10 w-10 rounded-xl border border-emerald-200 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100 hover:text-emerald-950 active:scale-95 transition-all cursor-pointer shadow-xs"
+                onClick={() =>
+                  openPaymentModal({
+                    type: 'tokens',
+                    title: 'Isi Ulang 10 Koin Vending',
+                    price: 15000,
+                    tokensCount: 10,
+                  })
+                }
+                className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/90 px-2.5 py-1 text-xs font-bold text-amber-950 hover:bg-amber-100 hover:border-amber-400 transition-all cursor-pointer shadow-2xs active:scale-95"
+                title="Klik untuk Isi Ulang Koin Vending via QRIS"
               >
-                <Menu className="h-5 w-5" />
+                <Coins className="h-3.5 w-3.5 text-amber-600" />
+                <span>{tokens} Koin</span>
+                <Plus className="h-3 w-3 text-amber-800 bg-amber-200 rounded-full" />
               </button>
+
+              {/* Status Lisensi Akun */}
+              <div className="hidden sm:block">
+                {user.isPro ? (
+                  <Badge variant="amber" icon={<Crown className="h-3 w-3" />}>
+                    PRO Active
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="neutral"
+                    icon={<User className="h-3 w-3 text-slate-500" />}
+                  >
+                    Tamu
+                  </Badge>
+                )}
+              </div>
+
+              {/* Status Jaringan Wi-Fi Bebas Kuota (Desktop Layar Lebar) */}
+              <div className="hidden xl:flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/90 px-2.5 py-1 text-xs text-emerald-800 shadow-2xs">
+                <Wifi className="h-3.5 w-3.5 text-emerald-600" />
+                <span className="font-mono text-[11px] font-semibold">Wi-Fi Lokal</span>
+              </div>
+
+              {/* Mobile Hamburger Button */}
+              <div className="flex items-center md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerOpen(true)}
+                  aria-label="Buka Menu Navigasi"
+                  className="flex items-center justify-center h-9 w-9 rounded-xl border border-emerald-200 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100 active:scale-95 transition-all cursor-pointer shadow-2xs"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

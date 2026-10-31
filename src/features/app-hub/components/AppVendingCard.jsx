@@ -10,8 +10,10 @@ import {
   Tag,
   Activity,
   Layers,
+  QrCode,
 } from 'lucide-react'
 import { Card, Badge, Button } from '@/components'
+import { useAuthStore } from '@/store/useAuthStore'
 
 // Mapping ikon dinamis
 const ICON_MAP = {
@@ -24,10 +26,19 @@ const ICON_MAP = {
 /**
  * Kartu Slot Aplikasi Vending Machine (Local App Card)
  * Menggunakan komponen reusable Card, Badge, dan Button
+ * Reaktif terhadap status saldo token dan lisensi akun
  */
 export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
   const IconComponent = ICON_MAP[app.iconName] || Layers
-  const isLocked = app.status === 'coming_soon' || !app.pricing?.isUnlocked
+
+  const unlockedApps = useAuthStore((state) => state.unlockedApps)
+  const isPro = useAuthStore((state) => state.user.isPro)
+  const openPaymentModal = useAuthStore((state) => state.openPaymentModal)
+
+  const isAppUnlocked = Boolean(
+    unlockedApps?.includes(app.id) || isPro || app.pricing?.isUnlocked
+  )
+  const isLocked = !isAppUnlocked
 
   return (
     <Card
@@ -62,11 +73,11 @@ export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
           <div className="flex flex-col items-end gap-1.5">
             <Badge
               variant={isLocked ? 'amber' : 'emerald'}
-              dot={!isLocked}
+              dot={true}
               pulse={!isLocked}
               icon={isLocked ? <Lock className="h-3 w-3" /> : null}
             >
-              {app.badge}
+              {isLocked ? app.badge : isPro && app.status === 'coming_soon' ? 'PRO UNLOCKED' : app.badge}
             </Badge>
 
             <span className="text-[10px] font-mono text-slate-500 font-medium">
@@ -116,26 +127,45 @@ export function AppVendingCard({ app = {}, onOpenDetails = () => {} }) {
             {app.stats?.tech || 'Local Core'}
           </span>
           <span className="font-semibold text-emerald-800">
-            {app.pricing?.priceLabel}
+            {isAppUnlocked ? '100% Siap Pakai' : app.pricing?.priceLabel}
           </span>
         </div>
 
         {/* Tombol Peluncuran */}
         {isLocked ? (
-          <Button
-            variant="amber"
-            icon={<Lock className="h-3.5 w-3.5" />}
-            onClick={() => onOpenDetails(app)}
-            className="w-full"
-          >
-            Lihat Jalur Pembayaran &amp; Lisensi
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="amber"
+              size="sm"
+              icon={<QrCode className="h-3.5 w-3.5" />}
+              onClick={() =>
+                openPaymentModal({
+                  type: 'pro',
+                  title: `Unlock ${app.name}`,
+                  price: 49000,
+                  tokensCount: 20,
+                })
+              }
+              className="w-full text-[11px] px-2"
+            >
+              Bayar QRIS
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Lock className="h-3.5 w-3.5" />}
+              onClick={() => onOpenDetails(app)}
+              className="w-full text-[11px] px-2"
+            >
+              Blueprint
+            </Button>
+          </div>
         ) : (
           <Link
             to={app.route}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition-all cursor-pointer group-hover:shadow-emerald-600/30 active:scale-95"
           >
-            <span>Buka Aplikasi Ini</span>
+            <span>{app.status === 'coming_soon' ? 'Buka Slot Pro (Unlocked)' : 'Buka Aplikasi Ini'}</span>
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         )}

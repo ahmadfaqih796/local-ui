@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header'
 import { AppHubPage } from '@/pages/AppHubPage'
 import { VoiceChangerPage } from '@/pages/VoiceChangerPage'
 import { FileTransferPage } from '@/pages/FileTransferPage'
+import { QrisPaymentModal } from '@/features/app-hub/components/QrisPaymentModal'
 
 /**
  * Komponen Utama Aplikasi dengan React Router DOM dan Fresh Green Light Mode (bg-green-50)
@@ -22,6 +23,9 @@ export function App() {
 
         {/* Header Bersih Segar Tanpa Tombol Mikrofon di Navbar */}
         <Header />
+
+        {/* Modal Pembayaran QRIS Global (Bisa Dibuka dari Mana Saja) */}
+        <QrisPaymentModal />
 
         {/* Sistem Navigasi Halaman dengan React Router */}
         <div className="flex-1">
